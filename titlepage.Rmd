@@ -1,0 +1,42 @@
+---
+output: pdf_document
+fontsize: 12pt
+---
+
+\begin{centering}
+
+\vspace{3 cm}
+
+\Huge\scshape{Creating macroeconomic indicators from microdata:} \\ 
+
+\Large\scshape{Cycles in business sentiment, art prices and historical commodity prices} \\ 
+
+\vspace{3 cm}
+
+\Large
+Laurie Binge
+
+14308304
+
+\vspace{3 cm}
+
+\normalsize
+Submitted in fulfilment of the requirements for the degree of Doctor of Philosophy
+
+July 2017
+
+\vspace{3 cm}
+
+\normalsize
+Economics Department
+
+\normalsize
+Stellenbosch University
+
+\vspace{3 cm}
+
+\Large
+Supervisor: Professor Willem H. Boshoff
+
+\end{centering}
+

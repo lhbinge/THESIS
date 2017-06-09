@@ -1,0 +1,1523 @@
+---
+output: 
+    pdf_document:
+        fig_caption: yes
+        number_sections: true
+header-includes:
+- \usepackage{float}
+---
+
+#Commodity Prices in the Cape Colony, 1889-1914
+##Introduction
+Recently, there has been what @Fourie2016 calls a Data Revolution in African Economic History. Over the past two decades the increase in access to online resources, data-processing software and computing power has enabled scholars to capture and analyse historical statistics on a much larger scale than before. Archival records from the colonial era are being digitised and transcribed on a much larger scale. One example is the Colonial Blue Books, a large collection of reports containing records of government revenue and expenditure, imports and exports, and a range of other statistics. These data sources can now be used to study a variety of issues, including population size, wages, incomes, education, fiscal systems, and transport networks of African societies (e.g. @Boshoff2015, @Greyling2015 and @DeZwart2011). 
+
+Historical statistics are often available only at an annual frequency. While lower frequency data can identify longer term trends, higher frequency data allow many important questions to be addressed more satisfactorily. It is important to look at higher frequency data, if possible, to investigate price histories, business cycles, and market behaviour in general. Reliable and consistent higher frequency data can clarify our understanding of the economic impact of many important historical events [@Mitchell2012]. 
+
+This paper attempts to make a contribution to the quantitative history of the Cape Colony using a newly digitised historical dataset of high frequency (i.e. monthly) prices from 1889 to 1914. The dataset consists of monthly market prices of agricultural products in various towns reported in the Agricultural Journals of the Department of Agriculture. The intention is to use the high frequency data to provide some new insight into the price history of the Cape Colony over this period.
+
+Price histories are a useful starting point for the analysis of issues in economic and financial history. Prices aggregate the information supply from the forces of demand, and thereby provide a signal of supply and demand conditions. In his seminal paper, *The Use of Knowledge in Society*, @Hayek1945 argues that in a system where knowledge is dispersed, prices that emerge from voluntary transactions between buyers and sellers can coordinate the separate actions of many different agents, each seeking his own interest, in such a way as to make everyone better off. In his book, *Free to Choose*, @Friedman1980 argues that prices coordinate economic activity in three ways. First, they transmit information about preferences, resource availability, and production possibilities. Second, they provide an incentive to adopt the least costly production methods and use available resources for the most highly valued purposes. Third, they determine the distribution of income. Agents adjust their demand for and supply of a particular commodity, based on these price signals. This spreads throughout the economic system and brings about the solution which might have been arrived at by a single agent possessing all the information in the system. 
+
+The turn of the 20th century was a period of huge structural change in South Africa. The discovery of gold on the Witwatersrand in 1886 fundamentally altered the structure of the economy from essentially pastoral to mining-intensive. Within a few decades the predominantly agricultural economy was transformed into a market and credit economy in which the ultra-capitalistic mineral production was of outstanding importance [@Schumann1938]. The Second South African War (1899-1902) fundamentally altered the region, and led to the formation of the Union of South Africa from the four colonies in 1910. The mineral revolution created an urgent need for an efficient means of transportation of goods and passengers between the coastal ports and the mining towns in the interior. The result was a rapid expansion of the railway network and a decline in transportation costs [@DeKock1924]. The Cape Colony is an interesting example of an early capitalistic economy over this period, where internationalisation and internal market integration was just beginning to take hold [@Boshoff2015].
+
+The primary aim of the paper is to develop a monthly wholesale commodity price index for the Cape Colony, of the type often used in the older economic literature (e.g. @Schumann1938, @Friedman1952 and @Friedman1963). @Friedman1952, for instance, investigated prices in the US during three wartime periods using monthly wholesale price indices. No wholesale commodity price index exists for the Cape Colony before 1910, a fact bemoaned by @Schumann1938. In creating the indices, the high frequency data from the Agricultural Journals are supplemented with annual market prices for agricultural products in various towns reported in the Cape Colony Blue Books. This allows the inclusion of a number of important products, such as wool and hides, which are omitted from the Agricultural Journals.
+
+The challenge in creating monthly wholesale price indices is that the monthly data is incomplete, both in terms of the coverage of products and towns. @Klovland2014a showed that the repeat sales method, which is typically used to create indices for infrequently traded goods such as real estate, may be used to deal with incomplete data in this context. The repeat sales methodology provides a consistent way to aggregate the price data and produces indices with substantially fewer gaps than there are in the individual series. It can be useful in other applications with incomplete or missing data.
+
+The paper applies the repeat sales method to estimate historical wholesale commodity price indices for each product. The product indices can provide information on supply and demand conditions for the various agricultural products. The product indices are then aggregated to form indices of broader product groups, as well as an overall wholesale commodity price index. The benchmark weightings are based on production values reported in the 1904 census, as well as import values reported in the Blue Books. The wholesale price indices display a relatively strong cyclical trend, which accords quite well with the historical narrative on the economic history of the Cape Colony. These high frequency indices will hopefully be of use to economists and economic historians in addressing a number of questions.  
+
+To gauge if they provide reasonable results, the price indices are compared to existing consumer price indices for the Cape Colony and to wholesale price indices for the UK and the US. In both cases the estimated indices seem plausible. The index is then compared to the monetary aggregates available, both as gauge of credibility of the estimated index and to provide insight into inflation history of the Cape Colony. The high-frequency prices are also used to gain some insight into the frequency and size of price changes over this period of the Cape Colony's history. The frequency and size of price changes were relatively large over the period. This information is then used to calculate an alternative measure of inflation, which can be decomposed into a flexible and sticky inflation components, to provide further insight into the price history of the period. 
+
+The secondary objective is to use the high-frequency price data to investigate internal market integration in the Cape Colony. There is a large international literature on market integration, but relatively little is known about regional market integration in the Cape Colony around the turn of the 20th century. Without the discovery of minerals the transformation of the country towards a market and credit economy would probably have been a gradual one, starting from the coastal and slowly rising interior market centres and proceeding towards the more outlying districts. The mineral revolution led to the rapid expansion of the railway network and created a potentially large internal markets [@Schumann1938]. Theory suggests that integrated markets should generate important benefits for an economy. There can be a comparative advantage effect that comes from greater regional specialisation, economies of scale, increased investment opportunities, and greater incentives for innovation and technical progress [@Andrabi2010].
+
+Market integration is a twofold process. The first dimension concerns how close prices are throughout the economy for the same goods. Market integration along this dimension features a decline in price gaps of dispersion. The second dimension features increase in the speed of return to equilibrium price gaps after a shock, i.e. "efficiency", which is the outcome of arbitrage by profit-seeking traders [@Federico2013]. The higher-frequency data can aid the investigation along both dimensions [@Ejrnæs2008]. This paper builds on the work of @Boshoff2015, by employing a larger and more complete dataset, and focussing specifically on the first dimension of market integration. The paper examines both absolute price gaps and cross-sectional price dispersion between the towns in the Cape Colony. The results indicate that there was increased market integration in the Cape Colony over the period, which corresponds to the period of rapid expansion of the branch railway lines.
+
+```{r readdata, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+##=====================##
+## READING IN THE DATA ##
+##=====================##
+suppressMessages(library(zoo))           
+suppressMessages(library(ggplot2))
+suppressMessages(library(plyr))
+suppressMessages(library(dplyr))
+suppressMessages(library(reshape2))
+suppressMessages(library(stargazer))
+suppressMessages(library(micEcon))
+suppressMessages(library(quantreg))
+suppressMessages(library(McSpatial))
+suppressMessages(library(quantmod))
+suppressMessages(library(xtable))
+suppressMessages(library(scales))
+suppressMessages(library(tseries))
+suppressMessages(library(urca))
+suppressMessages(library(lmtest))
+suppressMessages(library(grid))
+suppressMessages(library(tempdisagg))
+suppressMessages(library(gridExtra))
+
+setwd("C:\\Users\\Laurie\\OneDrive\\Documents\\BING\\THESIS")
+
+GDP <- read.csv("GDP.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+GDP$Date <- as.Date(GDP$Date)
+trade <- read.csv("Trade.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+trade$Date <- as.Date(trade$Date)
+CPI <- read.csv("CPI.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+CPI$Date <- as.Date(CPI$Date)
+
+suppressMessages(library(BCDating))
+ts.GDP.a <- ts(GDP[,c("lnRGDP")],start =c(1856),end=c(1909),frequency=1)
+m1 <- td(ts.GDP.a ~ 1, to = "quarterly", conversion = "last", method = "denton-cholette")
+ts.GDP.m <- predict(m1)
+#datums <- as.Date(time(ts.GDP.m), frac = 1)
+#write.csv(indicator_plot,"dates.csv")
+datums <- read.csv("dates.csv")
+datums$Date <- as.Date(datums$Date)
+dat <- BBQ(ts.GDP.m, mincycle = 5, minphase = 2, name="lnRGDP")
+tp <- as.data.frame(show(dat))[,-3]
+tp$Peaks <- as.character(tp$Peaks)
+tp$Peaks <- as.Date(as.yearqtr(tp$Peaks, format = "%YQ%q"), frac = 1)
+tp$Troughs <- as.character(tp$Troughs)
+tp$Troughs <- as.Date(as.yearqtr(tp$Troughs, format = "%YQ%q"), frac = 1)
+tp$Troughs[nrow(tp)] <- "1909-12-31"
+detach("package:BCDating", unload=TRUE)
+```
+
+##The Economic History of the Cape Colony
+This section discusses the economic history of the Cape Colony between the discovery of gold in 1886 and the start of WWI in 1914. The idea is to provide some context for the subsequent investigation of the price history of the Cape Colony over the period. 
+
+The seminal works of @DeKock1924, @Schumann1938 and @DeKiewiet1941 discuss the economic and social history of the South African colonies in the late 19th and early 20th centuries. These studies provide similar narratives of the economic development of South Africa around that period. More recently, @Greyling2015 calculated GDP estimates for the Cape Colony, in order to facilitate the analysis of long-term growth and development in the Colony. This section provides a brief description of the economic history of the period (i.e. GDP growth, inflation, imports and exports), by relating the historical narratives to the quantitative evidence from the GDP estimates. 
+
+Figure 4.1 illustrates the real GDP estimates for the Cape Colony reported in @Greyling2015, with recessionary periods shaded. The turning points in the indicators are determined with the non-parametric dating algorithm, first suggested by @Bry1971, which automates the Burns & Mitchell approach to determining classical turning points. The algorithm identifies local minima (troughs) and maxima (peaks) in a single time series, after a log transformation. A variant of this algorithm for dealing with quarterly data, called the BBQ method, was developed by @Harding2002. A censoring rule based on a minimum of 1 year for each phase and 2 years for a full cycle is used to ensure that phases and cycles have a minimum duration, as suggested by @Harding2002. The algorithm has the advantage that it is a simple, transparent, easily replicable, and provides intuitively appealing results [@DuPlessis2006]. The resulting turning points differ slightly from those derived by @Greyling2015 using the Baxter-King band-pass filter. 
+
+```{r figure4.1, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Real GDP in the Cape Colony (1956-1909)"}
+indicator_plot <- cbind(datums$Date,as.data.frame(ts.GDP.m))
+colnames(indicator_plot) <- c("Date","lnRGDP")
+indicator_plot$lnRGDP <- as.numeric(indicator_plot$lnRGDP)
+g <- ggplot(indicator_plot[-1:-120,]) 
+g <- g + labs(color="Legend text")
+g <- g + geom_line(aes(x=Date, y=lnRGDP, colour="lnRGDP"), size = 1)
+g <- g + geom_rect(data=tp[-1:-7,], aes(xmin=Peaks, xmax=Troughs, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.5)
+g <- g + ylab("log Real GDP") + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g <- g + theme(legend.position="none")
+g
+```
+
+Taken as a whole the Cape Colony experienced relatively rapid expansion over this so-called "gold-mining" period, during which the structure of the economy transformed from an agricultural economy to an agricultural-mineral economy [@Schumann1938]. According to these estimates, the Cape Colony experienced three upswing phases and three relatively short downswing phases between 1886 and 1909, with the most severe recession during the Second South African War (1899-1902). These cycles correspond quite closely to the business cycle peaks in Britain [@Klovland2014a].
+
+The discovery of gold was followed by an upswing phase, lasting roughly from 1886 to 1889. Between 1886 and 1889, there were large investments in the gold mining industry, a substantial proportion which was directed through the banks in the Cape Colony. The prosperity was accompanied by speculation in gold shares and property and easy credit extension by the banks [@Greyling2015]. 
+
+This upswing phase was followed by a depression as the result of the financial and banking crisis in 1889-1890. The crisis was due to the overextension of credit and massive speculation in property and gold shares [@Schumann1938]. According to @Gilbert1933, the speculative bubble was broken by the realisation that many mines located on outside reefs would not be profitable and that deep level mining would have to be attempted by the mines on the reef. Most of the District Banks in the Cape got into financial difficulties and were absorbed by the larger banking institutions [@DeKock1924]. The crisis was intensified by the Baring crisis of 1890 in England. The price of gold shares, land and prospecting firms plummeted, while railway traffic, government revenue and imports declined marginally [@Greyling2015]. @Schumann1938 reports that the banks of the Cape felt the effects more severely than economic conditions in general. Agriculture in the Cape Colony did not suffer from the recession immediately, as the harvest prospects for 1890 were good. A relatively short recession followed in 1890, although real GDP was relatively flat until 1895. 
+
+The recovery continued between 1895 and 1899, although real GDP was still relatively stagnant. Political and natural factors contributed to the relatively stagnant period [@Gilbert1933]. The Jameson Raid at the end of 1895 had an unsettling effect on business conditions. Tensions between the Boer Republics and Britain led to the closure of the drifts in September and October 1895, disrupting road transport of goods into the interior and outward to the coastal ports. A severe drought in 1896 and the rinderpest cattle disease caused widespread livestock losses, especially in the interior [@Schumann1938; @DeKock1924].
+
+The outbreak of the Second South African War (1899-1902) caused a severe recession. The war had a devastating effect on the economies of the Boer Republics. Agricultural prospects were severely hampered following the "scorched earth" policy of the British forces. This policy caused destruction of farm buildings, crops and livestock in the Transvaal and the Orange Free State, and to a lesser extent in parts of the Cape Colony and Natal. Gold mining in the Transvaal came to an almost complete standstill until 1902, with the value of gold production declining from £16m in 1898 to £1m in 1901 [@Schumann1938]. This had a huge impact on monetary systems throughout the world, as noted in @Friedman1963's seminal study, "*The Monetary History of the United States*".
+
+The huge increase in expenditure by the British Government in connection with military operations created prosperity in parts of the Cape Colony and Natal, especially amongst the farming and trading communities. The war cost Great Britain around £250 million, of which a large proportion was spent in the Cape Colony and Natal to purchase agricultural and pastoral produce for the troops. Within a few months of the outbreak of the war, the number of British soldiers in South Africa increased to 130,000, and subsequently to around 250,000 (nearly 25% of the white population of the four territories combined) [@Schumann1938].
+
+Figure 4.2 illustrates the imports and exports over the period. The Report on the Customs Transactions of the Colony for 1900 reported that the huge increase in imports into the Cape Colony was could be attributed to the large number of immigrant residents, expenditure on troops en route, and the restricted production of foodstuffs in the districts affected by the war. The marked increase in imports from 1899 to 1903 was due in large part to the increased imports of military supplies for the British troops [@Gilbert1933]. British military expenditure on around 250,000 soldiers therefore provided an injection for consumption and production in the Cape Colony and Natal [@Greyling2015]. 
+
+At the same time, exports from Cape and Natal ports declined considerably, from almost £25m in 1898 to £7.5 in 1900, due to the increased local demand for produce and the temporary cessation of gold mining. The decline in exports did not seriously affect purchasing power abroad, as the large remittances of funds by the British Government from London to South Africa served to more than offset the reduction in value of the exports. The increase in imports and railway revenues, from the transport of troops and war materials, also enhanced the public revenues [@Schumann1938]. The war demand for goods and services therefore stimulated increases in prices and production in the Cape Colony [@DeKock1924]. According to the Cape Colony GDP estimates, the trough was reached already by the end of 1900.
+
+```{r figure4.2, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Total Imports and Exports in the Cape Colony (1986-1909)"}
+indicator_plot <- trade[,c("Date","Imports","Exports","Trade_Balance")]
+g <- ggplot(indicator_plot) 
+g <- g + labs(color="Legend text")
+g <- g + geom_line(aes(x=Date, y=Imports, colour="Imports"), size = 1)
+g <- g + geom_line(aes(x=Date, y=Exports, colour="Exports"), size = 1)
+g <- g + geom_rect(data=tp[-1:-7,], aes(xmin=Peaks, xmax=Troughs, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.5)
+g <- g + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + scale_x_date(limits = c(as.Date("1886-12-31"), as.Date("1909-12-31")),
+                      labels = date_format("%Y"),breaks = date_breaks("year"))
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+g <- g + scale_y_continuous(name="Value (pounds)", labels = comma)
+g
+```
+
+This was followed by relatively swift recovery and a robust upswing phase. According to @Schumann1938, the post-war boom was mainly the result of a general feeling of optimism, both in England and in South Africa, after the conclusion of the war. This optimism resulted in the extension of bank credit and extensive speculation in property, as well as an increase in the importation of capital and goods to aid reconstruction. The reconstruction schemes, including a development loan of £3 million granted by the British Government, stimulated economic activity and a speculative environment [@DeKock1924]. Immigration also increased significantly after the war, presumably in search of mineral wealth, with 71,081 people landing at Cape ports in 1903, compared to 27,192 in 1908 [@Gilbert1933].
+
+However, the post-war boom was short-lived. According to the GDP estimates, recession set in by 1907, although the historical sources put the date a few years earlier. According to @Schumann1938, the depression was caused by a cyclical reaction to the large economic disequilibrium. During the war production and trade had been increased due to the greater demand for foodstuffs and other commodities. Production and trade was further expanded after the war, based on the expected expansion and prosperity of the gold and other industries. Despite the relatively early return to gold production, the progress of the gold industry was hampered by the lack of an adequate supply of unskilled labour. The inflow of purchasing power due to the war ended and large stocks of military goods were sold. When the expectations of growth were not fully realised, a long period of depression followed [@DeKock1924]. The depression may also in part be explained by the complete destruction of the interior by the war [@Schumann1938]. The financial panic in Europe and America in 1907 and its effects on South African trade, as well as the drought of 1908, may also have deepened the depression [@DeKock1924].
+
+The depression seems to have lasted up to 1910, the year of the Unification of the four colonies, which was in line with reviving conditions in England [@Schumann1938]. The subsequent recovery period seems to have taken place up to the outbreak of WWI in 1914 (the end of the sample period). @DeKock1924 [127] referred to this as the period of economic reorganisation, with an expansion in the agricultural, mining and manufacturing industries. The benefits of the construction of branch railway lines in many parts of the country promoted the development of farming enterprises. The gold industry was growing rapidly and the diamond industry had recovered quickly and resumed its progress [@DeKock1924]. Although it was not a period of exceptional prosperity, conditions were generally fairly stable.
+
+Overall, the turn of the 20th century was a turbulent period of South African history. Globalisation and the discovery of minerals transformed the Cape Colony into a prosperous exporting region with a steadily increasing GDP [@Fourie2015a]. The largest single economic event over the sample period (1889-1914) seems to have been the Second South African War (1899-1902). The following section provides a brief description of the war period.
+
+###The Second South African War (1899-1902)
+The Second South African War (1899-1902), or Anglo-Boer War, was fought between Britain on the one side, with its two colonies (the Cape Colony and Natal), and the two independent Boer Republics (the South African Republic or Transvaal and the Orange Free State) on the other. It proved to be the longest (almost 3 years), costliest (over £200 million), bloodiest (estimates vary between 59,000-68,000 lives), and most humiliating colonial war for Britain between 1815 and 1914 [@Packenham1979]. @Marks2011 argues that the war as important in shaping modern South Africa as the American Civil War was for the United States. 
+
+After the discovery of the gold deposits on the Witwatersrand, immigrants (labelled *Uitlanders*) poured into the Transvaal. The tensions around the franchise of the *Uitlanders*, many of whom were of British origin, became the main source of conflict between the Transvaal and British Governments and ostensibly the cause of the war. However, there were also wider considerations relating to the powerful financial interests centred on the control of the gold mines [@Marks2011]. Factors such as the Jameson Raid, *Uitlander* grievances, monopolies, and tariffs were directly connected with gold mining interests. Any attempt by the British Government to secure concessions from the Transvaal Government made it the agent of the mining magnates [@DeKiewiet1941]. Moreover, Britain was pursuing its lengthy quest for a united South Africa [@DeKiewiet1941] and its need to assert itself in the face of economic competition from America and Germany [@Marks2011]. 
+
+War was declared by the Boer Republics on 11 October 1899, after the expiry of President Kruger's ultimatum to the British government to withdraw all their troops from the border of the Transvaal. Kruger had hoped for a short war, like the clash with Britain in 1881, when the British quickly gave up the fight. This time round a long drawn-out war ensued, with numerous unforeseen consequences [@Fourie2015]. 
+
+Within a year the British captured the capitals of the two Republics, Bloemfontein (on 13 March 1900) and Pretoria (on 5 June 1900), without meeting much resistance [@Fourie2014]. Contrary to expectations, however, this did not put an end to the war. There were too many areas still not under British control and the line of communication through the Orange Free State was poorly guarded and vulnerable [@Pretorius1998]. Hostilities lasted for another two years. Giving up on the impossible objective of trying to halt the British advance, Boer commando forces switched to guerrilla tactics [@Pretorius1998]. Moving in mobile commandos, Boer soldiers launched running attacks on British columns and supply lines [@Marks2011] and strategically intercepted British outposts and deliveries over the vast Highveld terrain [@Fourie2014]. 
+
+The British responded with a threefold strategy to end the war, involving block houses, intensifying the scorched earth policy and the use of concentration camps. Block houses were erected to protect strategic points such as bridges and railways, and as barriers to limit the free movement of the Boers across the countryside. The scorched earth policy involved the destruction of homesteads, burning of foodstuffs and crops and the slaughtering of livestock. Boer women and children were then sent concentration camps [@Fourie2014]. These soon became notorious, as insanitary conditions, poor rations and overcrowding led to major epidemics and high mortality rates. Thousands of displaced Africans, too, were rounded up and put into segregated concentration camps, many of which also served as labour depots for the British army [@Marks2011]. 
+
+By 1902 the Republics had been ground down by the large resources of the British army, the destruction of farms, the high death rates among women and children in the concentration camps, and the increasingly tight British control of the countryside through blockhouses and barbed wire [@Marks2011]. The Boer leadership was forced to sue for peace, and on 31 May 1902 the Peace Treaty of Vereeniging was signed [@Pretorius1998]. At the signing of the peace the British Government promised £3million towards rehabilitating the Transvaal and the Orange Free State.
+
+Estimates of the mortality rates vary, but it is estimated that at least 22,000 British and 7,000 Boer soldiers died. More than 27,000 Boer women and children died in the concentration camps (out of the 118,000 inmates). An estimated 12,000 black South Africans, who fought in large numbers on both sides, lost their lives, although these estimates are less precise [@Fourie2014]. Recent estimates suggest that African camp mortality rates may have been even higher than in the Boer camps [@Marks2011].
+
+For the purposes of movements in commodity prices, two factors were especially important over this period. From the demand side, the war involved a massive influx of British troops. In 1897, there was at most 10,000 British troops within the Cape Colony [@Evans2000]. By 1900, the British had shipped in massive reinforcements for a counteroffensive against the Republics. By the end of the war, almost 450,000 British regulars and colonial forces had been involved in the war (although all were not necessarily present at any given time), compared to an estimated 88,000 Boer and volunteer forces [@Fourie2014]. The size of the invading army was as large as the combined white citizenry of the Republics [@Marks2011].
+
+From the supply side, the scorched earth policy led to the systematic devastation of the Republics [@Pretorius1998]. The policy started as specific reprisals for Boer attacks, whereby farms in the vicinity of attacks would be burnt. In September 1900 the policy was extended to the destruction of all farms and food supplies within 16km of an incident, or if a farm had been used as a commando base. In December 1900, the land clearance policy was intensified in order to deny support to Boers in the field. Over the course of the war some 30,000 houses, including farms, were burned down or extensively damaged [@Evans2000]. The onslaught on the Boers means of survival was intensified by the destruction of all food supplies. Livestock was killed in enormous numbers, and fields of grain and maize burned. The devastation in the two Republics led to subsequent food shortages [@Pretorius1998]. 
+
+Table 4.1 reports the 1891, 1904 and 1911 census production numbers for 5 commodities in the Cape Colony. Although the scorched earth policy caused the destruction of crops and livestock mostly in the interior of the country, it is still visible in the census numbers for the Cape Colony in 1904, two years after the war. @DeKock1924 showed that the substantial decreases in livestock are visible in the official statistics for all four of the regions during the War. Cattle herds were depleted to such an extent that for years, large quantities of frozen meat had to be imported to satisfy the local demand. The war deprived South Africa of more than half of its stock of horses and caused a great setback in the wool industry by reducing the number of woollen sheep significantly [@Fourie2014].
+
+\begin{table}[]
+\centering
+\caption{Census production in the Cape Colony}
+\label{my-label}
+\begin{tabular}{rrrrrrr}
+\textbf{Year} & \textbf{Wheat (200lbs)} & \textbf{Maize (200lbs)} & \textbf{Cattle} & \textbf{Woolled Sheep} & \textbf{Horses} \\
+1891                 & 909,000                 & 965,000                 & 2,211,000       & 13,631,000             & 444,000         \\
+1904                 & 567,000                 & 1,131,000               & 1,954,000       & 8,465,000              & 255,000         \\
+1911                 & 1,305,000               & 1,728,000               & 2,715,000       & 13,239,000             & 334,000         \\
+\multicolumn{2}{l}{\textit{Source: De Kock (1924)}}     &                         &                 &                        &                
+\end{tabular}
+\end{table}
+
+Moreover, trade between the territories had all but collapsed with the outbreak of the war. According to the Report on the Customs Transactions of the Colony for 1899 (in the Blue Books) the war paralysed trade between the Cape Colony and the two Boer Republics and was seriously interfering with trade with the northern districts of the Cape Colony. Indeed, all trade was suspended between the Cape Colony and the Boer Republics on the 12th October 1899, and a Proclamation (No. 277) was issued, prohibiting such trade. 
+
+One would expect these developments to lead to an increase in agricultural commodity prices around the war period. The two new datasets provide a way of investigating if these developments in demand and supply were reflected in the commodity prices. In addition, the more comprehensive wholesale price index may provide insight into the inflation history during this period. The following section briefly discusses the monetary, banking and inflation history of the period.
+
+###Banking, Money and Inflation
+The expansion of banking and currency and corresponding crises in the Cape Colony during this period points to the rise of a more modern capitalistic and credit economy, and the culmination of business cycles in the modern sense [@Schumann1938]. The development of a more modern monetary and banking system closely influenced the nature of the business cycle, and the banks were instrumental in intensifying the phases [@Schumann1938]. 
+
+Figure 4.3 illustrates a measures of the M1 money supply reported in @Verhoef2014, calculated as currency (coins and paper money in circulation) plus deposits (private bank fixed deposits). The movements in the money supply were naturally related to the developments in the banking and monetary system over the period. According to this rough measure there were large changes in the money supply over the period, reflecting the episodes of instability in the monetary and banking system. The most important of these were the banking crisis of 1889-90, the smaller cycle of 1895-96, and the war period around 1899-1904.
+
+```{r figure4.3, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="M1 Money Supply in the Cape Colony (1986-1909)"}
+indicator_plot <- GDP[-1:-30,c("Date","Currency","Total_Savings")]
+indicator_plot$Money_Supply <- indicator_plot$Currency+indicator_plot$Total_Savings
+g <- ggplot(indicator_plot) 
+g <- g + labs(color="Legend text")
+g <- g + geom_line(aes(x=Date, y=Money_Supply, colour="Money_Supply"), size = 1)
+#g <- g + geom_line(aes(x=Date, y=Total_Savings, colour="Total_Savings"), size = 1)
+g <- g + geom_rect(data=tp[-1:-7,], aes(xmin=Peaks, xmax=Troughs, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.5)
+g <- g + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g <- g + scale_y_continuous(name="Money Supply (pounds)", labels = comma)
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="none")
+g
+```
+
+@Friedman1963 discusses three major channels through which any change in the stock of money occurs. The first channel is high-powered money, which is the total of currency held by the public plus bank reserves. Any increase in the total of high-powered money involves an equal percentage increase in the stock of money. High-powered money in this case was constrained by the international gold standard. The amount of high-powered money changes through imports and exports of specie in order to produce a balance with other countries on the same standard [@Friedman1963]. Gold generally flowed into the country through large capital investments in the mines. Under the stimulus of the mining industry there was a remarkable development of banking in South Africa during the period [@DeKock1924]. 
+
+The second channel is the ratio of commercial bank deposits to bank reserves. The higher this ratio the larger the amount of deposits outstanding for a given amount of reserves. The ratio of deposits to reserves depends on the willingness of the banks to create deposits relative to their reserves, on regulations, and on the amount of high-powered money available. The third channel is the ratio of commercial bank deposits to currency held by the public. The higher this ratio, the larger the fraction of high-powered money that will be used as bank reserves, and hence the larger the money stock. The ratio of deposits to currency is determined by the public, the government (legal conditions under which currency and deposits may be issued) and the banks (services and interest offered to depositors) [@Friedman1963].
+
+The rapid advance in currency and bank deposits in 1886-1889, followed by the exceptional decrease in 1890-1892, reflects the overextension and drastic contraction of credit before and after the banking crisis of 1889-90. The speculative boom had resulted from the opening of the gold mines, which led to this overexpansion of credit and inflation of currency [@Schumann1938]. One would expect these investments to lead to an increase in bank deposits and currency imports. Between 1887 and 1889, more than £4 million in specie was imported, nearly two-thirds of the total capital of the gold mines [@Gilbert1933].
+
+During the crisis most of the District Banks in the Cape got into financial difficulties. There were hardly any restrictions on banks and their note issues. In the aftermath of the crisis, 7 of the 8 District Banks were liquidated or amalgamated into the three Imperial Banks: Standard Bank, African Banking Corporation, and the Bank of Africa [@DeKock1924]. In this way the banking business of the Cape Colony was concentrated, with the exception of the Stellenbosch District Bank, in the hands of the three Imperial banks. The Colonial Banking Act was passed in 1891 to prevent similar banking crises and, at the same time, to secure a market for Government stock. According to the Act the banks were to deposit government securities with the Treasury to the full amount of their note issue, the notes being legal tender and redeemable in gold. The total sum issued was limited to the amount of paid-up capital and reserve [@DeKock1924].
+
+After the banking crisis of 1889-90 there was again a period of considerable inflow of capital from abroad there were large investments in the gold mining industry. A substantial proportion was directed through the banks in the Cape Colony and in 1895 over £5 million in specie was imported. This was followed by a similar, albeit less severe, crisis in the latter part of 1895, during which large losses were sustained on gold shares [@Gilbert1933]. 
+
+There was an exceptional increase in both deposits and loans during the war period, especially in the Cape Colony, as well as vast specie imports [@Schumann1938]. Britain was supporting an army in the country which required local supplies and labour. Capital and merchandise imports continued for two years after the war, partly from the borrowing for reconstruction and partly from the resumption of mining activities. There was a sharp decrease in the money supply after 1903, as accumulating debt service came to exceed new capital. The result was a large outflow of specie after 1903 [@Gilbert1933]. 
+
+Imports of coin again appeared around 1906, but this was curtailed by the local and international recession in 1907 [@Gilbert1933]. The branch-banking system was firmly established and the concentration of banking resources was even carried a step further after the establishment of the Union in 1910 [@Schumann1938]. According to @DeKock1924, there was a fairly rapid development of banking activities from 1910 to 1914, with large imports of coinage. 
+
+Taking the period as a whole, the country was normally an importer of specie. It is surprising that an export surplus appears more frequently than an import surplus before 1900. @Gilbert1933 argued that this is explained by the large invisible debits, which were met in part out of new capital. The rapid growth of debt service and other invisible imports gradually reduced merchandise imports and produced an export surplus in 1905 that lasted until WWI.
+
+Overall, this was a period of rapid expansion of the commercial banking system. During this period the Imperial banks opened a large number of new branches, not only in the Cape Colony, but throughout South Africa. Table 4.2 reports the banking statistics for all the banks in South Africa (in £'000s). Reserves and Coin and Bullion peaked in 1902, towards the end of the war. @Gilbert1933 provides some rough evidence on the timing of capital inflows, by looking at capital applications in London from South African mines, new railroad miles completed annually, and imports of machinery into the Cape Colony. These measures reflect the cyclical movements in capital imports, with peaks between 1902 and 1904.
+
+\begin{table}[]
+\centering
+\caption{Banking statistics in South Africa (in £'000s)}
+\label{my-label}
+\begin{tabular}{rrrrrrr}
+\multicolumn{1}{l}{\textbf{Year}} & \multicolumn{1}{l}{\textbf{Reserves}} & \multicolumn{1}{l}{\textbf{Currency}} & \multicolumn{1}{l}{\textbf{Deposits}} & \multicolumn{1}{l}{\textbf{Loans}} & \multicolumn{1}{l}{\textbf{Dep/Res}} & \multicolumn{1}{l}{\textbf{Dep/Cur}} \\
+1891                              &                                  & 4,473                                        & 12,295                                & 9,820                              &                                       & 2.75                                      \\
+1899                              & 6,162                                 & 8,077                                        & 25,153                                & 19,684                             & 4.08                                      & 3.11                                      \\
+1902                              & 8,814                                & 11,472                                       & 47,222                                & 34,985                             & 5.36                                      & 4.12                                      \\
+1905                              & 8,439                                 & 8,907                                        & 44,039                                & 37,020                             & 5.22                                      & 4.94                                      \\
+1907                              & 8,217                                 & 7,968                                        & 37,791                                & 30,801                             & 4.60                                      & 4.74                                      \\
+1910                              & 	                                 & 7,766                                        & 42,474                                & 37,133                             &                                       & 5.47                                      \\
+\multicolumn{4}{l}{\textit{Sources: De Kock (1924); Schumann (1938)}}                                                                                                        & \multicolumn{1}{l}{}               & \multicolumn{1}{l}{}                      & \multicolumn{1}{l}{}                     
+\end{tabular}
+\end{table}
+
+According to Table 4.2, the ratio of deposits to reserves reached a peak in 1902 and declined towards 1907. The rise in the deposit-reserve ratio may reflect the rise and maturation of the Imperial banks, which may have found it profitable to operate with a lower reserves relative to deposits. The ratio of deposits to currency increased throughout the period.  At the outset, the public held £2.75 of deposits for each pound of currency. This increased to almost £5.5 by 1910. The low initial value probably helped to produce and intensify the banking crisis of 1889-90. In general, banking difficulties will to be followed by a fall in the ratio of deposits to currency, as the public seeks to convert the one into the other [@Friedman1963]. The rise in the ratio thereafter probably reflected the rapid spread of the branch-banking system and the more widespread availability of checking facilitates and the greater usefulness of bank deposits. Another important factor was probably the growing real income per capita over the period [@DeZwart2011].
+
+One would expect overall price inflation to reflect these development in the money supply. No wholesale price index exists for the Cape Colony over the period, a fact bemoaned by @Schumann1938, although a few consumer prices indices have been calculated. @Gilbert1933 computed a weighted aggregative index of the retail prices of 13 foods for the years 1883 to 1907. The figures were calculated as the average for 9 towns in the Cape Colony. The indices are only available graphically, and are reproduced in Figure 4. @Gilbert1933 found that domestic prices declined slightly during the recession until 1893, which was followed by an upward trend which continued to 1898. Then there was a rapid rise in the index in 1889. From 1899 to 1902, war-time inflation increased prices to a very high level. This was followed by a severe recession and swift decline that lasted at least to 1908. Similarly, @Schumann1938 reports that his retail price index increased from 990 in 1895, the first year that this index was available, to a maximum of 1267 in 1902. It then decreased to 991 in 1909. 
+
+![Cape Colony domestic retail price indices (1910=100)](Gilbert.png)
+
+Figure 4.5 illustrates the annual CPI indices for the Cape Colony reported in @DeZwart2011 and @Verhoef2014. @DeZwart2011 calculated CPI based on a "bare bones" and a "respectable" basket of goods for consumption to calculate the cost of living in the Cape Colony in the 19th century. This involved the creation of consumption baskets that reflected the consumption patterns of the workers, as well as price series of products in those baskets. The indices included 8 and 10 products[^3] respectively, based on the annual "average market prices of consumables", "average prices of agricultural produce" and import and export prices, as found in the Colonial Blue Books and Statistical tables. Because of missing data, it was necessary to interpolate and extrapolate many of the series.
+
+[^3]: These were: beef, bread or wheat, butter, candles, cheese, coal, cotton, peas and beans, fish, soap, wheat, and wine. The bare bones consumption basket reflected the cost of bare subsistence, while the respectable consumption basket included higher quantities of the products, as well as beef, cheese and wine instead of fish.
+
+```{r figure4.5, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Consumer Price Indices for the Cape Colony"}
+indicator_plot <- CPI
+g <- ggplot(indicator_plot[-1:-6,]) 
+g <- g + labs(color="Legend text")
+g <- g + geom_line(aes(x=Date, y=Bare.Bones.Index, colour="Bare.Bones.Index"), size = 1)
+g <- g + geom_line(aes(x=Date, y=Respectable.Index, colour="Respectable.Index"), size = 1)
+g <- g + geom_line(aes(x=Date, y=Verhoef.CPI, colour="Verhoef.CPI"), size = 1)
+g <- g + geom_rect(data=tp[-1:-7,], aes(xmin=Peaks, xmax=Troughs, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.5)
+g <- g + ylab("Consumer Price Indices") + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + scale_x_date(limits = c(as.Date("1886-12-31"), as.Date("1913-12-31")),
+                      labels = date_format("%Y"),breaks = date_breaks("year"))
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+g
+```
+
+These indices do not seem provide a consistent inflation history for the period. The respectable basket CPI seems to come closest to the inflation path implied by growth in the money supply and GDP. Below, the paper evaluates whether the new wholesale price index can provide a clearer picture of the inflation history of the period. The following section discusses the history of railway development and market integration.
+
+###Railway Development and Market Integration
+For most of the 19th century transport between towns in South Africa was basic and expensive, owing to the large distances between towns and the rugged terrain between the coast and the interior. The ox wagon, pulled by between twelve and nineteen oxen, was the main form of freight transport between towns [@Fourie2015]. 
+
+The mineral revolution created an urgent need for an efficient means of transportation of goods and passengers between the coastal ports and the mining towns in the interior. The result was a rapid expansion of the railway network and a decline in costs [@DeKock1924]. The railway line from Cape Town to Kimberley was completed in 1885. In 1892, railway lines from Kimberley to Port Elizabeth, the port on the Eastern Cape coast, and to the gold mines of Johannesburg were completed. The railway network was used to transport diamonds and gold to the coast, as well as transporting produce, provisions and the large mining machinery to the growing towns in the interior [@Fourie2015]. The completion of these main railway lines between the coastal towns and the mining towns served to integrate transaction flows in an unprecedented way [@Greyling2015]. On long-distance routes, railways soon surpassed road traffic [@Boshoff2016].
+
+Prior to the war the Cape Government had been concerned mainly with the construction of main lines and the development of main line traffic. The Cape Colony's railway network initially consisted of three trunk lines connecting the ports of Cape Town, East London and Port Elizabeth with the interior of the country and the diamond producing area of Kimberley. Access was limited to towns where the main railway lines to the mines passed through. Towns further from the main routes had to rely on transport riders which were expensive over long distances [@Fourie2015a]. 
+
+In the meantime, a number of private companies had been established, under concession and subsidy from Parliament, for the purpose of building branch lines. For example, in 1883 the Cape Central Railway was authorised as a subsidised line by an Act of Parliament. The first section of the line, from Worcester to Ashton, was opened for traffic in 1887, and subsequently from Ashton to Swellendam in 1897. It was not until 1906 that the line was extended as far as Mossel Bay [@DeKock1924]. 
+
+Another period of rapid expansion of the railway lines occurred just after the war. Investment was concentrated on branch lines to act as feeders to the trunk lines or as connections between them (e.g. the route between Cape Town and Port Elizabeth) [@Fourie2015]. A number of branch and subsidiary main lines were built with a view developing the agricultural prospects of the Colony [@Schumann1938]. Between 1902 and 1910, 1,194 miles of new railway lines were opened by the Cape Government, compared to 244 miles during the previous nine years from 1892 to 1901 [@DeKock1924].
+
+Figure 4.6 illustrates the development of the railways in South Africa. The dates indicate the opening of the railway line at each town (underlined dates indicate the start of construction). The thicker lines denote railway lines completed before 1902, while the thinner lines denote lines completed after 1902.
+
+@Fourie2015a found that the development of the railway made a huge contribution to economic growth in the Cape Colony. According to their estimates, 46%-51% of the growth in labour productivity in the Cape Colony between 1873 and 1905 derived directly from the railway. 
+
+Presumably, internal or regional market integration was also aided by the development of the railways around the turn of the 20th century. Theory suggests that integrated markets should generate important benefits for an economy. There can be a comparative advantage effect from greater regional specialisation, economies of scale, increased investment opportunities, and greater incentives for innovation and technical progress [@Andrabi2010].
+
+![Development of the railways in South Africa](Railways.png)
+
+Cournot characterised an integrated market as "*an entire territory of which the parts are so united by the relations of unrestricted commerce that prices take the same level throughout with ease and rapidity.*" Market integration is therefore a twofold process. Firstly, the equilibrium level of prices must be equal, and secondly, prices must return easily and quickly to this level after a shock [@Federico2012]. 
+
+The first dimension concerns how close prices are throughout the economy for the same goods. Market integration along this dimension features a decline in price gaps or dispersion. Transportation costs are an important determinant of price dispersion. Falling transport costs should lead to less price dispersion and better integrated markets [@Andrabi2010]. That is why it is particularly instructive to study this period in the Cape Colony, when there was large development of the railway infrastructure. The second dimension features an increase in the speed of the return to equilibrium price gaps after a shock, which is the outcome of arbitrage by profit-seeking traders. This reflects growing market efficiency, especially through better circulation of information about prices and fundamentals [@Federico2013]. These two conditions ought to be tested separately, with different techniques. Testing price gaps or dispersion can be done by looking at pairwise trends in relative prices or, for a large number of markets, by trends in the coefficient of variation. Testing efficiency needs time-series comovement and cointegration methods [@Federico2013]. High-frequency data can aid the investigation along both dimensions [@Ejrnæs2008].
+
+Overall the international literature seems to show that railway development was one of the main causes of the substantial convergence in grain and other commodity prices in several economies in the late 1800s and early 1900 [@Andrabi2010]. Railways improved the integration of markets in many regions, including Europe [@Federico2012], the US [@Federico2013] and India [@Donaldson2012]. @Andrabi2010, however, showed that not all integration was necessarily a consequence of railway construction and that commodity prices in India were converging almost as rapidly between districts without railways as with railways. 
+
+Little is known about regional market integration in the Cape Colony around the turn of the 20th century, however, which was presumably aided by the development of the railways. @Boshoff2015 showed that product markets in the Cape Colony were fairly well integrated by the turn of the century. They found that Western Cape agricultural markets were quite well integrated internally, as evidenced by the significant correlations between prices in Malmesbury, Clanwilliam, Worcester and Cape Town. The wheat and maize markets of major towns located on the main railway lines were integrated with those of Cape Town, particularly those of Beaufort West and Colesberg and the key market of Kimberley. They also found that Eastern Cape wheat and maize markets were on the whole less well integrated with Cape Town markets, though the towns with good railway links, such as Aliwal North, Cradock, Dordrecht and King William's Town, did have significant connections with the market in Cape Town. They estimated a long-term equilibrium relationship, using the bounds test method suggested by @Pesaran2001. The results confirmed that Eastern Cape wheat markets were not integrated with Cape Town's but that there was a long-term relationship between Kimberley's wheat and maize prices and those of Cape Town.[^4]
+
+[^4]: In an unpublished follow-up study Boshoff and Fourie (2016) looked at the CVs for these products and found that there was evidence of strong integration for wheat, mealies, mutton, and beef prices (medians of 0.17, 0.19, 0.19 and 0.18). However, fresh butter, eggs, potatoes and especially tobacco were far less integrated. They constructed a basket of the eight products, based on the weights of the bare bones basket in @DeZwart2011. The results indicated that by 1907 price changes seem to be highly correlated and aligned in a tight band. Only a relatively small proportion of towns were integrated according to unit root tests of the price ratios, although the proportion of integrated relationships increased over the period. The pairwise relationships suggested that even towns on the main trunk route from Cape Town to Kimberley (i.e. Worcester and Beaufort West) remained poorly integrated. Rail transport seemed to predominantly favour the interior towns of Kimberley and Vryburg. By 1907, these towns were served by multiple lines running from the coast, which explains the integration with towns in both the Western Cape and Eastern Cape regions.
+
+The study of market integration was complicated by limited data availability. For instance, the correlations were only based on monthly data for the period 1897-1906 for just 4 products, while the bounds tests could only be applied to the prices from 5 towns. Moreover, the analysis of correlations and cointegrating relationships test only the second dimension of market integration, i.e. efficiency in the parlance of @Federico2012. This paper builds on the work of @Boshoff2015, by focussing specifically on the first dimension of market integration, and expanding the period and set of products. The paper examines both absolute price gaps and cross-sectional price dispersion between the towns in the Cape Colony. 
+
+###Summary
+Overall, the turn of the 20th century was a turbulent period of South African history. Globalisation and the discovery of minerals transformed the Cape Colony into a prosperous exporting region with a steadily increasing GDP [@Fourie2015a]. Over this period, therefore, the Cape Colony is an interesting example of a developing capitalistic economy, where internationalisation and internal market integration was just beginning to take hold [@Boshoff2015]. The largest single economic event over the sample period (1889-1914) seems to have been the Second South African War (1899-1902). 
+
+This paper attempts to make a contribution to the quantitative history of the Cape Colony using a newly digitised historical dataset of high frequency (i.e. monthly) prices from 1889 to 1914. The primary aim of the paper is to develop a monthly wholesale commodity price indices for a number of individual products, as well as an overall wholesale commodity price index. The individual price indices are intended to shed light on the demand and supply factors that influenced product prices. The more comprehensive wholesale price index is intended to provide a clearer picture of the inflation history of the period. The secondary objective is to use the high-frequency price data to investigate internal market integration in the Cape Colony, during this period of rapid development of the railway network. The paper tries to contribute to this literature by focussing specifically on the first dimension of market integration, i.e. absolute price gaps and cross-sectional price dispersion between the towns, while expanding the period and the number of products. The following section introduces the two datasets used in the paper. 
+
+##Data
+The primary aim of the paper is to estimate monthly historical wholesale commodity price indices for the Cape Colony between 1889 and 1914. The wholesale commodity price indices presented below are based on two new datasets on market prices[^5] that have been digitised and transcribed.
+
+[^5]: All prices were reported in pounds sterling (£), shillings (s) and pennies (d) and converted to pennies. There were twenty (20) shillings (s) per pound (£). The shilling (s) was subdivided into twelve (12) pennies (d). 
+
+The first dataset reports the monthly "*Current Market Rates (Wholesale) of Agricultural Produce*", as telegraphed by the Civil Commissioners and reported in the Agricultural Journals of the Department of Agriculture of the Cape Colony. The Journals are available from October 1889 to August 1914, which dictates the period that the indices cover. Monthly data are available for 24 different commodities (e.g. wheat, eggs and tobacco)[^6] in 19 towns across the Cape Colony (e.g. Cape Town, Kimberley and Port Elizabeth).[^7] This dataset expands on the prices used in @Boshoff2015.
+
+[^6]: The 24 products are wheat, wheat flour, boer meal, mealies, mealie meal, barley, oats, oathay, lucerne hay, potatoes, tobacco (boer roll), beef, mutton, fresh butter, eggs, cattle (slaughter), sheep (slaughter), pigs (slaughter), bread, oranges, saddle-horses, transport oxen, milch cows, woolled sheep.
+	
+[^7]: The 19 Cape Colony towns are: Aliwal North, Beaufort West, Burghersdorp, Cape Town, Clanwilliam, Cradock, Dordrecht, East London, Graaff-Reinet, Graham's Town, Kimberley, King William's Town, Malmesbury, Mossel Bay, Port Alfred, Port Elizabeth, Queen's Town, Tarkastad, and Worcester. The data also includes a few prices for towns in the other territories (e.g. Johannesburg) in the final few months of the sample. Unfortunately, these are too few to include in the indices.
+
+Figure 4.7 illustrates the number of monthly observations by commodity. Clearly the sample suffers from missing data points. The Journal volumes do not record prices for all of the towns for all of the products over the sample period, and for some months no prices were recorded. The increase in observations around the turn of the century is due to the fact that weekly prices were recorded over that period. 
+
+```{r comdata, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+##=====================
+##Agricultural Journals
+##=====================
+comdata <- read.csv("Commodities.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+comdata$datum <- paste(comdata$datum, comdata$Year)
+comdata$date <- as.Date(as.yearmon(as.character(comdata$datum),"%B %Y"),frac=1)
+comdata$datum <- factor(as.yearmon(as.character(comdata$datum),"%B %Y"))
+
+#-------------------------------------------------------------------
+wc.towns <- c("Beaufort West","Bredasdorp","Caledon","Cape Town","Ceres","Clanwilliam",
+              "George","Knysna","Ladismith","Malmesbury","Mossel Bay","Oudtshoorn","Paarl","Piquetberg",
+              "Prince Albert","Riversdale","Robertson","Stellenbosch","Swellendam","Tulbagh","Uniondale",
+              "Worcester","Van Rhyn's Dorp","Wynberg")
+ec.towns <- c("Albany","Albert","Aliwal North","Burghersdorp","Cradock","Dordrecht","East London","Graaff-Reinet",
+              "Graham's Town","Humansdorp","King Williams Town","King William's Town","Middelburg",
+              "Port Alfred","Port Elizabeth","Queen's Town","Somerset East","Tarkastad","Uitenhage","Willowmore",
+              "Mount Currie","Kokstad","Umtata")
+nc.towns <- c("Colesberg","Kimberley","Philipstown","Richmond")
+kzn.towns <- c("Pietermaritzburg, Natal","Durban, Natal")
+in.towns <- c("Bloemfontein","Bulawayo","Johannesburg","Pretoria","Salisbury","Vryburg")
+cape <- c(wc.towns,ec.towns,nc.towns)
+col.towns <- c(cape,kzn.towns)
+all.towns <- c(wc.towns,ec.towns,nc.towns,kzn.towns,in.towns)
+#-------------------------------------------------------------------
+comdata <- comdata[comdata$town %in% cape,]
+
+coms <- aggregate(comdata$wheat, by=list(comdata$date), FUN = function(x) sum(!is.na(x)))
+for(i in colnames(comdata)[7:29]) {
+    coms1 <- aggregate(comdata[,i], by=list(comdata$date), FUN = function(x) sum(!is.na(x)))
+    coms <- merge(coms, coms1, by="Group.1",all.x=TRUE)
+}
+colnames(coms) <- c("Date",colnames(comdata)[6:29])
+rm(coms1)
+```
+
+```{r figure4.7, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Total the number of monthly observations by commodity"}
+complot <- melt(coms, id="Date") 
+complot$value[complot$value=="0"] <- NA
+g <- ggplot(complot, aes(x=Date,value,colour=variable,fill=variable))
+g <- g + geom_bar(stat="identity")
+g <- g + theme(legend.title=element_blank())
+g <- g + ylab("Total observations")
+g <- g + theme(legend.key.size = unit(0.4,"cm"))
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g
+```
+
+Figure 4.8 illustrates the monthly prices for one of the commodities, wheat, by town. Wheat prices varied widely over the period, especially around the turn of the century. The challenge is to combine these time series in a consistent way in order to construct a coherent index of monthly wheat prices.
+
+```{r rscomdata, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+rscomdata <- comdata[,c("time_id","date","town","wheat")]
+rscomdata$commodity <- "wheat"
+colnames(rscomdata) <- c("counter","date","town","price","commodity")
+for(i in colnames(comdata)[7:29]) {
+    rscomdata1 <- comdata[,c("time_id","date","town",i)]
+    rscomdata1$commodity <- i
+    colnames(rscomdata1) <- c("counter","date","town","price","commodity")
+    rscomdata <- rbind(rscomdata, rscomdata1)
+}
+rscomdata$lnprice <- log(rscomdata$price)
+rscomdata <- transform(rscomdata, id = as.numeric(interaction(factor(town),factor(commodity),drop=TRUE)))
+```
+
+```{r figure4.8, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Monthly wheat prices by town - Agricultural Journal"}
+suppressMessages(library(grid))
+rscomdata1 <- rscomdata[rscomdata$commodity=="wheat",]
+g <- ggplot(data=rscomdata1,aes(x=date, y=price, colour=town)) 
+g <- g + geom_point(size = 0.5) 
+g <- g + geom_line()
+g <- g + ylab("Wheat prices") + xlab("")
+g <- g + theme(legend.key.size = unit(0.5,"cm"))
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + theme(legend.title=element_blank())
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g
+```
+
+The second dataset reports annual market prices in the Colonial Blue Books of the Cape Colony, available from 1889 to 1907. The annual market prices in Colonial Blue Books were collected by the colonial administrators in South Africa and sent to the Colonial Office in London [@DeZwart2011]. This information on "Average Market Prices of Agricultural Produce,"[^8] "Provisions,"[^9] and "Stock and Animal Productions"[^10] were used to create a database that includes prices of 50 agricultural products in 48 towns.[^11] In a few cases there were more than one series for a specific commodity, such as three different series for wine (ordinary quality, better quality and wine without a description) and two series for beer (English and Colonial). The annual data for the Provisions possibly reflect average retail prices, rather than the wholesale prices of the other series [@DeZwart2011]. However, this paper follows @Klovland2013 in including these few prices rather than leaving large gaps in the series. One would expect the retail prices to follow a similar trend to the wholesale prices.
+
+[^8]: Wheat, barley, rye, oats, mealies, peas & beans, potatoes, pumpkins, aloes, argol, wine and brandy.
+
+[^9]: Oatmeal, flour, bread, mutton, beef, pork, bacon, butter, cheese, tea, coffee, sugar, rice, tobacco, dried fruit, salt, wine, brandy, beer, milk, candles, and lamp oil. 
+
+[^10]:  Saddle horse, draught mules, asses, draught oxen, milch cows, woolled sheep, cape sheep, swine, goats, fowls, ducks, washed wool, fat and tallow, soap, hides, sheep skins, and goat skins.
+
+[^11]: The 48 Cape Colony towns are: Albany, Albert, Aliwal North, Beaufort West, Bredasdorp, Caledon, Cape Town, Ceres, Clanwilliam, Colesberg, Cradock, East London, Fort Beaufort, George, Glen Grey, Graaff-Reinet, Humansdorp, Kimberley, King Williams Town, Knysna, Ladismith, Malmesbury, Middelburg, Mossel Bay, Oudtshoorn, Paarl, Philipstown, Piquetberg, Port Elizabeth, Prince Albert, Queen's Town, Richmond, Riversdale, Robertson, Somerset East, Stellenbosch, Swellendam, Tulbagh, Uitenhage, Uniondale, Willowmore, Worcester, Van Rhyn's Dorp, Wynberg, Mount Currie, Kokstad, Umtata.
+
+The annual data is also incomplete in terms of the coverage of products and towns. Figure 4.9 illustrates the annual prices for wheat by town. Again, wheat prices seem to have varied widely between towns in the Cape Colony over the sample period. 
+
+```{r bluedata, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+blue <- read.csv("Blue_Books.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+blue <- blue[blue$town!="Walfish Bay",]
+
+rsblue <- blue[,c("date","town","oatmeal")]
+rsblue$commodity <- "oatmeal"
+colnames(rsblue) <- c("date","town","price","commodity")
+for(i in colnames(blue)[4:62]) {
+    rsblue1 <- blue[,c("date","town",i)]
+    rsblue1$commodity <- i
+    colnames(rsblue1) <- c("date","town","price","commodity")
+    rsblue <- rbind(rsblue, rsblue1)
+}
+rsblue$lnprice <- log(rsblue$price)
+rsblue <- transform(rsblue, id = as.numeric(interaction(factor(town),factor(commodity),drop=TRUE)))
+```
+
+```{r figure4.9, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=5, fig.width=8, fig.cap="Annual wheat prices by town - Blue Books"}
+rsblue1 <- rsblue[rsblue$commodity=="wheat",]
+g <- ggplot(data=rsblue1,aes(x=date, y=price, colour=town)) 
+g <- g + geom_point(size = 1) 
+g <- g + geom_line()
+g <- g + ylab("Wheat prices") + xlab("")
+g <- g + theme(legend.key.size = unit(0.3,"cm"))
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + theme(legend.title=element_blank()) 
+g
+```
+
+In some cases the commodity and town series in the two datasets overlap, although they are almost always reported in different units. For instance, in the monthly dataset wheat prices are reported in pounds (lbs), whereas in the annual data the wheat prices are reported per bushel. This means that the trends can be compared, even though the levels are different. For the most part the average prices reported in the two datasets seem to capture a similar trend over time, as one would expect. 
+
+The challenge is to combine and aggregate these two sets of prices in a consistent way in order to create coherent price indices of agricultural commodities for the Cape Colony. This is complicated by the fact that there are so many missing values in both panels. The following section presents the methodology suggested to tackle these challenges.
+
+##Methodology
+###Price indices
+Higher-frequency price indices are useful in studying inflation (often during periods of war), business cycles, and market behaviour in general. The first generation of historical price indices, such as @Jevons1865 and @Giffen1879, focused on the influence of the supply of precious metals (typically gold) on the variation in the general price level. @Gilbert1933 followed this tradition in his analysis of the economic effects of gold discoveries on South Africa, using an annual weighted aggregated index of the prices of 13 foods for 1883-1907. Another strand of the literature, which includes @Persons1921 and @Silberling1923, focused on the measurement of business cycles or "*business conditions during alternating periods of prosperity and depression.*" The seminal work of @Schumann1938 on business cycles in South Africa follows this tradition. He used a quarterly wholesale price index from 1910-1936 in this analysis. 
+
+The primary aim is to use these two datasets of market prices to construct a monthly historical wholesale commodity price indices for the Cape Colony from 1889 to 1914. No such commodity price index exists for the Cape Colony over that period. The brief review of the data sources showed that the price series were extracted from publications that were incomplete and in some cases just missing. This is a common occurrence, as many historical price series must be extracted from publications which are incomplete and in some cases no longer accessible. Even if sources are available on a continual basis there will inevitably be cases when a particular data series has been discontinued or contains substantial gaps. The supply of agricultural commodities may vary according to seasonal factors and occasional crop failures, creating gaps in the price series. Coverage may deteriorate during periods of conflict or war. Quality descriptions and publication practices may also change over time. These problems make it challenging to combine price data to form continuous time series [@Klovland2014a].
+
+The traditional way of dealing with the problem of gaps in historical data is to splice the time series at a point in time when there is overlapping information (see for instance @Solar2011). This method requires great care and involves substantial work. If there are many time series and various gaps in the data, as is often the case with higher frequency historical data, this procedure may become very difficult to implement consistently [@Klovland2014a].
+
+@Klovland2014a recommended that the repeat sales method could be useful whenever underlying series were characterised by incomplete observations. The repeat sales method was specifically developed for a market where the price of each object is quoted infrequently and at irregular intervals, which is typical in the real estate market. A similar, albeit less extreme, situation is typical of historical price data, where the gaps between the observed prices are usually shorter. The problems encountered in aggregating the individual time series to an overall index are in principle the same. One can think of each commodity price series as a specific item (e.g. a property or an artwork). The repeat sales approach compares the price of that same item over time, with a sale occurring whenever a data point is observed. 
+
+###Repeat Sales Method
+The repeat sales method was initially proposed by @Bailey1963 to calculate house price changes. They saw their procedure as a generalisation of the chained matched model methodology applied previously in the construction of real estate price indices. The method was subsequently extended by @Case1987, among others, and is currently used to produce the S&P/Case-Shiller Home Price Indices in the US.
+
+The repeat sales method tracks the sale of the same item over time. It aggregates sales pairs and estimates the average return on the set of commodities in each period [@Kraussl2010]. The index numbers are derived directly from a least squares regression involving a set of dummy variables and requiring only information on the rate of change of the individual price series and the dates at which the data are observed [@Klovland2014a].
+
+Following @Wang1997, the model underlying the method in @Bailey1963 may be derived in the following manner. Where $t_1$ and $t_2$ are the times of the first and second transactions, a price relative $\frac{P_{i,t_2}}{P_{i,t_1}}$ can be modelled as:
+$$\frac{P_{i,t_2}}{P_{i,t_1}} = \frac{I_{t_2}}{I_{t_1}} \times u_{i,t} , $$
+where $P_{it}$ is the price of commodity $i$ at time $t$; $I_t$ is the true but unknown index for period $t$; and $u_{i,t}$ is the idiosyncratic error term. Taking logs,
+$$\ln \frac{P_{i,t_2}}{P_{i,t_1}} = -\ln(I_{t_1}) + \ln(I_{t_2}) + \ln(u_{i,t})$$
+
+Using vector notation, this relationship can be expressed as $y = X \beta + \epsilon$, where $y$ is the (known) vector of logged price relatives; $\beta$ is a T-dimensional column vector of unknown logarithms of the index numbers to be estimated, such that the $t$-th component of the (to this point unknown) $\beta$ vector is $\beta_t = \ln(I_t)$; X is a matrix of $(n \times T)$ dimensions such that the $t$-th component of each row is -1 if $t=t_1$, +1 if $t=t_2$, and 0 otherwise; and $\epsilon$ is the vector of $\log(u_{i,t})$ values. 
+
+The repeat sales model may also be derived as the first differences of a hedonic model, yielding the same regression model. The standard specification of the repeat sales usually takes the following form:
+$$\ln \frac{P_{it}}{P_{is}} = \sum_{t=1}^T \beta_t D_{it} + u_{it}$$
+where $P_{it}$ is the price of a particular commodity $i$ (e.g. wheat in Cape Town) in time $t$; $P_{is}$ is the price of exactly the same commodity $i$ at time $s$; $\beta_t$ is the parameter to be estimated for time $t$; $D_{it}$ represents a time dummy equal to 1 in period $t$ when the resale occurs, -1 in period $s$ when the previous sale occurs, and 0 otherwise; and $u_{it}$ is a white noise residual. 
+
+Thus, in the standard repeat sales model the dependent variable is regressed on a set of dummy variables corresponding to time periods. The coefficients are estimated only on the basis of changes in item prices over time. The index numbers are derived from the dummy variable coefficients, requiring information only on the rate of change of the individual price series and the dates at which the data are observed. The price index is simply the antilog of the series of estimated coefficients: $\hat{\beta_1}, ..., \hat{\beta_T}$. 
+
+At each time $t$ there exists a distribution of growth rates in the population. The repeat sales estimator is a measure of the central tendency of this distribution, in the form of the geometric mean of the growth rates of the items that sold more than once.[^12]  @Bailey1963 showed that the $\beta$ estimates (i.e. the mean logged price indices) consist of the period-by-period weighted averages of the logged price relatives, with weights proportional to their sample sizes. In other words, the regression solutions are complicated weighted averages of the average logged price relatives. @Wang1997 showed this clearly for a relatively simple and intuitively appealing example with two periods. For example, the first index value in $t_1$ is the weighted average of the two quantities: the average logged appreciation of items observed in period $t_0$ and $t_1$; and the average appreciation from $t_0$ to $t_2$ minus the average appreciation from $t_1$ to $t_2$. The weights given to the two estimators are proportional to their sample sizes.
+
+[^12]: Such an index will track the geometric mean, rather than the arithmetic mean, of prices over time, because of the log transformation prior to estimation. If it is assumed that the regression residuals are normally distributed in each period, a correction can be made by defining corrected index values as: $I_t =\exp\left[\gamma_t+ 1/2(\sigma_t^2-\sigma_0^2 )\right]*100$, where $\sigma_t^2$ is the estimated variance of the residuals in period t (Renneboog & Spaenjers 2012). In practice this adjustment is often negligible (Hansen 2009), which is also the case in this sample.
+
+In this case, the repeat sales method has the great advantage of being able to handle gaps of any length in the data series. It utilises all of the information in the dataset, compared to the traditional approach of cumbersome manual splicing of time series of individual prices. As @Wang1997 noted, if the number of observations does not vary across time periods (i.e. if there are no gaps in the time series), the repeat sales estimator simplifies to an ordinary chain index.
+
+One would like to observe prices for a static commodity description over time (e.g. English beer per bottle). However, new qualities are often introduced to the market (e.g. beer per gallon) and old ones disappear. For some commodities the sources of supply may vary by season. The repeat sales approach can also handle this case by tracking prices for the same product description over time.
+
+The typical disadvantages of the repeat sales method are not real concerns in this case, namely that single-sale data is discarded and that there is sample selection bias in the types of commodities that are sold more than once [@Hansen2009]. In this case, all of the commodities were sold more than once and could be included in the index estimates. It is also possible to attach less weight to observations calculated from rates of change over long periods of time than on changes from adjacent periods. For instance, changes in product specifications or other characteristics are more likely to have changed if there are large time intervals between the observations. @Case1987 suggested a weighted three-step least square procedure to deal with this problem However, this is likely to be less of a problem in this sample because the sales appear so frequently, compared to real estate prices which often only resell after decades.  
+
+####Repeat Sales Example
+A simple example from the data may be used to illustrate the procedure. Table 4.3 reports the wheat prices per 100lbs in 3 towns over a period of 10 months. The purpose is to calculate a price index for this period, given the missing observations (NAs) in the data. The main challenge is to put the data together in a consistent way. For period 3 it would be natural to combine the price increases from Beaufort West and Cape Town. For the other periods there are a number of ways to splice the time series. In practice, with many time series, such procedures would be very difficult and time consuming to handle consistently.
+
+```{r table4.3, echo=FALSE, results='asis', warning=FALSE, message=FALSE, cache = TRUE}
+#Toy Example
+toy <- dcast(comdata, time_id + datum ~ town, mean, value.var="wheat")
+toy <- toy[21:30,c("time_id","datum","Beaufort West","Cape Town","Worcester")]
+toy$t <- 1:nrow(toy)
+#toy1$lnvalue <- log(toy1$value) 
+
+maak <- function(naam) {
+    toy2 <- toy
+    toy2 <- toy2[!is.na(toy[,naam]),c(naam,"t")]
+    for(i in 1:(nrow(toy2)-1)) {
+        toy2$P[1] <- 0
+        toy2$P[i+1] <- log(toy2[i+1,naam]/toy2[i,naam])
+    }
+    xmat <- array(0, dim = c(nrow(toy2)-1, nrow(toy))) 
+    for(i in 1:(nrow(toy2)-1)) {
+        xmat[i,toy2$t[i]] <- -1
+        xmat[i,toy2$t[i+1]] <- 1
+    }
+    einde <- cbind(toy2$P[-1],xmat)  
+    return(einde)
+}
+
+einde <- as.data.frame(rbind(maak("Beaufort West"),maak("Cape Town"),maak("Worcester")))
+dy <- einde$V1
+xmat <- as.matrix(einde[,2:ncol(einde)])
+
+rsales <- lm(dy ~ xmat + 0)
+rs_index <- as.data.frame(exp(rsales$coefficients))
+n <- rs_index[1,1]
+rs_index <- rs_index/n*100
+rs_index <- na.locf(rs_index)
+
+toy <- cbind(toy,rs_index)
+toy <- toy[,c(2,3,4,5,7)]
+colnames(toy)[c(1,5)] <- c("Date","Index")
+
+xt <- xtable(toy, caption="Repeat sales example with wheat prices")
+print(xt, "latex", include.rownames=FALSE,comment=FALSE, 
+      caption.placement = getOption("xtable.caption.placement", "top"), scalebox = 0.9)
+```
+
+The repeat sales method uses a simple least squares regression on time dummies to produce the estimated index values. Repeat sales pairs are formed from the price relatives of the same commodity (in this case wheat) for each town. For example, for Beaufort West, 3 sales pairs can be formed (e.g. 135/150). The sample consists of 12 sales pairs and 10 time dummies are created for the 10 time periods, reported in Table 4.4. The first sales pair corresponds to the first two observations for Beaufort West, with a price decrease of 10.5% between period 1 and 2 and time dummies of -1 and 1 for the first two periods. The other rows are derived in the same manner. Running a least squares regression on this dataset produces a set of coefficient estimates for the 10 dummy variables. Taking the antilog to these estimates produces the index in Table 3. In this case the additional prices from Worcester help to make the index continuous, specifically by adding price observations in the 4th and 8th periods, where there were only missing observations. Thus, including more price series will lead to fewer gaps in the index. Even if the prices are at different levels due to factors such as transport costs, for the purposes of the index the trends (or growth rates) are compared over time.
+
+```{r table4.4, echo=FALSE, results='asis', warning=FALSE, message=FALSE, cache = TRUE}
+colnames(einde) <- c("ln(Pt/Ps)","D1","D2","D3","D4","D5","D6","D7","D8","D9","D10")
+xt <- xtable(einde, caption="Rgression input of repeat sales example with wheat prices",digits=c(3,3,0,0,0,0,0,0,0,0,0,0))
+print(xt, "latex", include.rownames=FALSE,comment=FALSE, 
+      caption.placement = getOption("xtable.caption.placement", "top"), scalebox = 0.9)
+```
+
+This approach treats all observations as equal, which means that towns observed more frequently than others will exert a stronger influence on the index, simply because there will be more observations in the dataset originating from this item. For example, if Cape Town wheat prices are recorded and included in the index calculations more frequently than Worcester prices, the Cape Town prices will have a larger implicit weighting in the index. In other words, the prices of the same commodity in different towns are treated equally and towns with more observations have a higher implicit weighting. This might be a sensible approach, as regularly quoted prices are often the most frequently traded [@Klovland2014a].  
+
+It is possible that the smaller towns have more price observations in some periods which do not properly reflect price movements in the larger towns, which might then bias the index to some degree. For instance, there might be an idiosyncratic spike in Worcester wheat prices in a period where only Worcester prices were reported. However, idiosyncratic price movements in specific towns are less likely to bias the overall indices because the estimates include a large number of towns from two separate datasets. 
+
+The repeat sales method therefore provides a consistent way to aggregate the data from the different towns for a specific commodity. This method also generates an index with substantially fewer gaps than there are in the individual series. 
+
+###Creating indices for specific commodities
+@Klovland2014a suggested that the simple unweighted version of the repeat sales model is most applicable at the lowest level of aggregation, i.e. for specific commodities such as wheat, when explicit weighting of different price observations is less crucial. The towns are weighted implicitly according to coverage, i.e. the number of observations in each dataset. Following this suggestion, the repeat sales method is used to aggregate the different time series for each commodity from the all the towns in the Cape Colony. This is the method described in the example above. 
+
+The annual prices from the Blue Books can be used to supplement the results from the monthly data from the Agricultural Journals. This is useful because the monthly commodity indices still contain substantial gaps where no data is available. It is also useful because the monthly dataset omits a number of important products and towns. Wool is one example of an important export product in the Cape Colony, which is not present in the monthly dataset. 
+
+The challenge then is to incorporate the lower-frequency (i.e. annual) index into a higher-frequency (i.e. monthly) index. The Blue Books data reports the annual market prices as average prices for November of each year. The simplest way to incorporate the annual prices is to set them as the November prices for each year, and then to simply add them to the monthly dataset. The repeat sales method is then applied to the monthly and annual prices together, to obtain a more complete index for each commodity. 
+
+Figure 4.10 illustrates the index for wheat prices in the Cape Colony, as well as two indices estimated with the two datasets separately for comparison.[^13] For the separate indices, the monthly wheat prices for 20 towns in the Cape Colony are combined to form a monthly wheat index, while the annual wheat prices for the 48 towns are combined to form an annual wheat price index. The total index combines the prices from both datasets and seems to reflect both of the separate indices closely. The repeat sales method allows for the estimation of an index with more complete coverage, although there are still a few gaps for the months when no price information was recorded. The index may be interpolated at this stage to obtain a complete index. This involves significantly less interpolation than would have been necessary if each individual series were interpolated from the start.
+
+[^13]: As a robustness check, the repeat sales method was also estimated on the two datasets separately, to obtain two indices for each commodity, one monthly and one annual. After interpolating the annual index, the two monthly indices for each commodity were then be combined again with the repeat sales method to obtain one reasonably continuous index for each commodity which covers all the towns in the Cape Colony. With this method, the indices from the two data sources implicitly receive an equal weighting. The results were very similar to the results reported below.
+
+```{r wheat, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+#--------------------------
+#Wheat example
+#--------------------------
+#Journal Index
+rscomdata1 <- rscomdata[rscomdata$commodity==c("wheat"),]
+rscomdata1 <- rscomdata1[complete.cases(rscomdata1),]
+repdata <- repsaledata(rscomdata1$lnprice,rscomdata1$counter,rscomdata1$id)  #transform the data to sales pairs
+repdata <- repdata[complete.cases(repdata),]
+repeatsales <- repsale(repdata$price0,repdata$time0,repdata$price1,repdata$time1,mergefirst=1,
+                       graph=FALSE)   #generate the repeat sales index
+RS_index <- exp(as.data.frame(repeatsales$pindex))*100
+RS_index$Date <- seq(1,1,length.out = ncol(RS_index))
+RS_index$Date <- unique(rscomdata$date)[c(1,sort(unique(c(repdata$time1,repdata$time0))))][-1]
+colnames(RS_index) <- c("Index","Date")
+RS_index <- RS_index[complete.cases(RS_index),]
+RS_index.ex <- aggregate(comdata$town, by=list(comdata$date), FUN = function(x) sum(!is.na(x)))
+colnames(RS_index.ex) <- c("Date","x")
+RS_index.ex <- merge(RS_index.ex, RS_index, by="Date", all=TRUE)[,-2]
+
+#Blue Index
+rsblue1 <- rsblue[rsblue$commodity==c("wheat"),]
+rsblue1 <- rsblue1[complete.cases(rsblue1),]
+repdata <- repsaledata(rsblue1$lnprice,rsblue1$date,rsblue1$id)  #transform the data to sales pairs
+repdata <- repdata[complete.cases(repdata),]
+repeatsales <- repsale(repdata$price0,repdata$time0,repdata$price1,repdata$time1,mergefirst=1,
+                       graph=FALSE)   #generate the repeat sales index
+rs_index.a <- exp(as.data.frame(repeatsales$pindex))*100
+rs_index.a$Date <- seq(1,1,length.out = ncol(rs_index.a))
+rs_index.a$Date <- unique(rsblue$date)
+colnames(rs_index.a) <- c("Index","Date")
+
+rs_index.a$Date <- paste(rs_index.a$Date,"-11-30",sep="")
+rs_index.a$Date <- as.Date(rs_index.a$Date)
+rs_index3 <- merge(RS_index.ex,rs_index.a,by="Date",all=TRUE)
+
+#Combine
+rsdata <- rs_index3
+colnames(rsdata) <- c("Date","Journal","Blue")
+rsdata <- melt(rsdata,id="Date")
+rsdata$lnprice <- log(rsdata$value)
+rsdata <- rsdata[complete.cases(rsdata),]
+repdata <- repsaledata(rsdata$lnprice,rsdata$Date,rsdata$variable)  #transform the data to sales pairs
+repeatsales <- repsale(repdata$price0,repdata$time0,repdata$price1,repdata$time1,mergefirst=1,
+                       graph=FALSE)   #generate the repeat sales index
+
+Index <- exp(as.data.frame(repeatsales$pindex))*100
+Index$Date <- seq(1,1,length.out = ncol(Index))
+Index$Date <- sort(unique(c(repdata$time1,repdata$time0)))
+
+Index <- merge(rs_index3,Index,by="Date", all = TRUE)
+colnames(Index) <- c("Date","Journal_Index","Blue_Index","Combined_Index")
+
+#-------------------------
+#Alternative wheat example
+rscomdata1 <- rscomdata[rscomdata$commodity=="wheat",]
+rscomdata1 <- rscomdata1[complete.cases(rscomdata1),]
+rscomdata1$bron <- "Journal"
+rsblue1 <- rsblue[rsblue$commodity=="wheat",]
+rsblue1 <- rsblue1[complete.cases(rsblue1),]
+
+rsblue1$date <- paste(rsblue1$date,"-11-30",sep="")
+rsblue1$date <- as.Date(rsblue1$date)
+rsblue1$bron <- "Blue"
+rscomdata1 <- rbind(rscomdata1[,-1],rsblue1)
+
+rscomdata1 <- transform(rscomdata1, id = as.numeric(interaction(factor(town),factor(commodity),factor(bron),drop=TRUE)))
+
+repdata <- repsaledata(rscomdata1$lnprice,rscomdata1$date,rscomdata1$id)  #transform the data to sales pairs
+repdata <- repdata[complete.cases(repdata),]
+repeatsales <- repsale(repdata$price0,repdata$time0,repdata$price1,repdata$time1,mergefirst=1,
+                       graph=FALSE)   #generate the repeat sales index
+RS_index <- exp(as.data.frame(repeatsales$pindex))*100
+RS_index$Date <- seq(1,1,length.out = ncol(RS_index))
+RS_index$Date <- sort(unique(c(repdata$time1,repdata$time0)))
+
+colnames(RS_index) <- c("Index","Date")
+RS_index <- RS_index[complete.cases(RS_index),]
+RS_index.ex <- aggregate(comdata$town, by=list(comdata$date), FUN = function(x) sum(!is.na(x)))
+colnames(RS_index.ex) <- c("Date","x")
+RS_index.ex <- merge(RS_index.ex, RS_index, by="Date", all=TRUE)[,-2]
+RS_index.ex[,3] <- RS_index.ex[,2]
+RS_index.ex[,2] <- na.approx(RS_index.ex[,3], na.rm=FALSE)
+colnames(RS_index.ex) <- c("Date","Total_Index_i","Total_Index")
+
+Index <- cbind(Index,RS_index.ex[,-1])
+```
+
+```{r figure4.10, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Wheat indices for the Cape Colony"}
+index_plot <- Index  # convert to long format
+g <- ggplot(data=index_plot[,c(1,6,2,3)]) 
+g <- g + geom_point(aes(x=Date, y=Blue_Index, colour="Blue_Index"), size = 2)
+g <- g + geom_line(aes(x=Date, y=Journal_Index, colour="Journal_Index"), size = 0.5)
+#g <- g + geom_line(aes(x=Date, y=Combined.Index, colour="Combined.Index"), size = 1)
+g <- g + geom_line(aes(x=Date, y=Total_Index, colour="Total_Index"), size = 1)
+g <- g + geom_point(aes(x=Date, y=Journal_Index, colour="Journal_Index"), size = 0.5)
+g <- g + geom_point(aes(x=Date, y=Total_Index, colour="Total_Index"), size = 1)
+g <- g + ylab("Wheat Index") + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g
+```
+
+###Aggregation of commodity indices
+The construction of the indices involve three stages of aggregation. The first stage involves aggregating the price information from the various towns from the two sources into indices for 43 individual commodities. This is accomplished by using the repeat sales method described above. This method involves piecing together the individual data series on each commodity in an efficient way to form an index series, using all available price information. For many commodities there are prices from both sources, as well as prices for different product qualities (e.g. colonial and English Beer or high and ordinary quality wine). This stage involves only an implicit weighting, where the towns with the greatest number of observations are the most influential in determining the coefficient estimates [@Klovland2014a].
+
+The next stage involves the aggregation of the individual commodity price indices into indices for 7 broader commodity groups, which are weighted together in the conventional manner, e.g. with the Laspeyres price index. For instance, @Klovland2014a aggregated his 110 commodities into 16 commodity groups (grain, meat, etc.) using chained Laspeyres indices, with weights based on output or trade values in 1835, 1870, 1890 and 1910. This raises the question of what weights to use to aggregate the different commodities. The Agricultural Journals, particularly in the earlier volumes refer to these prices as "wholesale" rates. The term "wholesale" may be defined as prices charged for sales in large lots, usually at the first commercial transaction in major trading centres [@Klovland2014a]. The first price indices were commonly referred to as wholesale price indices and typically comprised both domestically produced goods and imported goods. However, the principles of weighting were not always applied consistently. More recently the focus has shifted towards producer price indices, which focus on prices obtained by domestic producers, and therefore include domestic goods sold at home, and in some cases also exported goods [@Klovland2014a]. 
+
+In this case the focus is on domestic production shares. The produce returns reported in the 1904 census are used as the benchmark weights. The value shares were calculated as the quantity of production multiplied by the average market prices of each individual commodity. The difficulty is that the census did not cover all of the commodities in the sample and a number of important products lack weights, e.g. wheat flour and beef. The weights for these products were based on import values reported in the Blue Books. This approach follows @Greyling2015, where agricultural output was based on the volume of production reported in the censuses, and also supplemented with information on export and import values. Thus, the different commodity indices for the Cape Colony are aggregated by applying weights based on the value shares of each commodity in domestic production, and supplemented by import value weights. This weighting scheme makes the indices akin to the Wholesale Price Index used in @Klovland2014a.
+
+The individual commodities included in each of the 7 commodity group indices are reported in Table 5. The categorisation are informed by the classification of the commodities in the sources of the price information. For instance, in the Blue Books, the prices are divided into Agricultural Produce, Stock and Animal Productions, and Provisions.[^14] 
+
+[^14]: A few commodities had to be excluded from the analysis because of a lack of observations. These include lucerne hay and oranges from the Agricultural Journals, as well pumpkins, aloes, argol, condensed milk and lamp oil from the Blue Books.
+
+```{r table4.5, echo=FALSE, results='asis', warning=FALSE, message=FALSE, cache = TRUE}
+##==================================
+comgroups.df = read.table(textConnection(
+    "Crops,Agri Produce,Pastoral Products,Livestock,Pastoral Provisions,Agri Provisions,Other Prov
+    Wheat, Tobacco,Wool,Cattle,Beef,Bread,Tea
+    Mealies,Dried Fruit,Hides,Horses Mules & Asses,Mutton,Flour,Coffee
+    Barley,Wine,Skins,Sheep,Pork,Mealie Meal,Sugar
+    Oats,Brandy,Cheese,Pigs,Eggs,Boer Meal,Beer
+    Oathay,	,Fat & Tallow,Goats,Butter,Oatmeal,Rice
+    Rye, ,Soap,Fowls & Ducks,Milk, ,Salt
+    Peas & Beans, ,	, , , ,Candles
+    Potatoes, , , , , ,"), sep=',', header=TRUE)
+
+xt <- xtable(comgroups.df, caption="Commodity classification")
+print(xt, "latex", include.rownames=FALSE,comment=FALSE, 
+      caption.placement = getOption("xtable.caption.placement", "top"), scalebox = 0.7)
+```
+
+The weights are only required to be relative value shares, i.e. weights relative to the other commodities in the larger commodity groups, which makes the commodities in each group easier to compare. For instance, the livestock production numbers from the census may be compared to each other to form the livestock index. However, only a portion of livestock produced would be sold in any given period, which makes it difficult to compare these numbers to all the other commodities produced, e.g. the gallons of milk produced. This is also the reason that the products included in the indices for provisions are kept apart from the other products. For example, wheat (Crops) and wheat flour (Agricultural Provisions) are included in separate commodity group indices, because the weighting for Crops are based on production value shares from the 1904 census, whereas the weighting for Agricultural Provisions is based on import value shares.
+
+The few gaps remaining in the individual commodity price indices are interpolated at this stage. The interpolation that occurs at this stage is much less severe than would be the case if all of the individual price series were interpolated from the start. A number of products were only reported in the Blue Books, so the indices only report values for November of each year. Similar to @Klovland2013, these indices are also interpolated to form monthly indices, which makes them smoother than the actual monthly price would have been. The series are seasonally adjusted and the weighted average of the price relatives are calculated, as suggested by the @IMF2004 for the construction of the PPI.
+
+The final stage then combines the 7 indices for the commodity groups to form an overall aggregate wholesale price index. The difficulty is that the weights are not all comparable, given that some of the commodity groups are weighted with reference to production values in the 1904 census, while the three provision indices are weighted with reference to import values. 
+
+There will always be some difficulties in finding the best weights with historical data like this. Different authors have used different assumptions to create relative value shares. @Klovland2013, for instance, estimated the relative weights for each commodity within the group as follows: The commodity with the greatest market value was given a load of 10 and the other commodities were scaled proportionately, using rounded integer load values, subject to the constraint that all the time series for which data was available would get a load factor of at least one. 
+
+In order to combine the 7 commodity groups into an overall wholesale index, a similar assumption is made about the relative weights of the commodity groups. The following weights are based on the available information on production and import value shares: Crops (5), Agricultural Produce (5), Pastoral Products (3), Livestock (5), Pastoral Provisions (5), Agricultural Provisions (3), and Other Provisions (3). The intention is merely to obtain a reasonable set of weights for the construction of the indices [@Klovland2014a].[^15] The following section presents the indices.
+
+[^15]: Klovland (2014b) makes to further points. Firstly, a case can be made for making some reduction in weights based on gross output measures, if a raw material is used extensively in the production of a more finished good, and both are included in the index. In practice it is a matter of judgement how far this principle can be pushed. A second point concerns the fraction of agricultural goods that was not sold on the market but consumed on the farms. For historical price indices this may be a highly relevant consideration. 
+
+##Results
+Figure 4.11 illustrates the seasonally adjusted commodity price indices for 4 individual commodities: wheat, tobacco, cattle and beef. There was a large variation in price movements when comparing individual commodity prices. The wheat price index decreased significantly after the recessionary period of the early 1890s. The index reached a trough in May 1895 and subsequently recovered during the upswing phase up to mid-1888. Subsequently, wheat prices were on a general downward trajectory, with two exceptions during the war (early 1901) and the post-war recovery (mid-1903). Wheat prices reached a trough in November 1911, before recovering somewhat towards the end of the sample period.
+
+In contrast, the tobacco price index remained relatively stable up until the outbreak of the war, before increasing substantially during the war period, from October 1899 to May 1901. Tobacco prices returned to pre-war levels during the post-war recession. @DeKock1924 reports that there was abnormal demand for products like tobacco and wine during the war, which increased prices and subsequently resulted in over-supply and a substantial decline in the prices during the subsequent recession.
+
+The indices for cattle and beef follow similar paths, which is reassuring for such closely related products (cattle prices were derived from separate series for cattle, transport oxen and *milch* cows). Both price indices increased significantly in the run-up to the war, with subsequent peaks in the post-war recovery period from 1902 to around 1906. Cattle prices exhibited some spikes during the war in the middle of 1900 and during the post-war recovery phases. There was a relatively sharp decrease into the recession in 1907, and the subsequent cycle peaked towards the end of 1911. The effect of the rinderpest outbreak in 1896 is barely visible, probably because cattle herd losses were suffered mostly in the Transvaal, Natal, the Orange Free State and the eastern districts of the Cape, as opposed to the entire Cape Colony [@DeKock1924].
+
+Beef prices increased significantly in the run-up to the war, with a large peak in 1903 during the recovery phase. This was followed by a significant decrease during the post-war recessionary period, and a mild recovery towards the end of the period. @DeKock1924 reports that large quantities of frozen meat had to be imported for years after the war to satisfy the local requirements.
+
+```{r makeindex, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+##==================================
+#Make Commodity Indices
+#--------------------------
+makeindex <- function(produk) {
+    rscomdata1 <- rscomdata[rscomdata$commodity==produk,]
+    rscomdata1 <- rscomdata1[complete.cases(rscomdata1),]
+    if(nrow(rscomdata1)>0) {rscomdata1$bron <- "Journal"}
+    rsblue1 <- rsblue[rsblue$commodity==produk,]
+    rsblue1 <- rsblue1[complete.cases(rsblue1),]
+    
+    if(nrow(rsblue1)>0) {
+        rsblue1$date <- paste(rsblue1$date,"-11-30",sep="")
+        rsblue1$date <- as.Date(rsblue1$date)
+        rsblue1$bron <- "Blue"
+        rscomdata1 <- rbind(rscomdata1[,-1],rsblue1)
+    }
+    
+    rscomdata1 <- transform(rscomdata1, id = as.numeric(interaction(factor(town),factor(commodity),factor(bron),drop=TRUE)))
+    
+    repdata <- repsaledata(rscomdata1$lnprice,rscomdata1$date,rscomdata1$id)  #transform the data to sales pairs
+    repdata <- repdata[complete.cases(repdata),]
+    repeatsales <- repsale(repdata$price0,repdata$time0,repdata$price1,repdata$time1,mergefirst=1,
+                           graph=FALSE)   #generate the repeat sales index
+    RS_index <- exp(as.data.frame(repeatsales$pindex))*100
+    RS_index$Date <- seq(1,1,length.out = ncol(RS_index))
+    RS_index$Date <- sort(unique(c(repdata$time1,repdata$time0)))
+    
+    colnames(RS_index) <- c("Index","Date")
+    RS_index <- RS_index[complete.cases(RS_index),]
+    RS_index.ex <- aggregate(comdata$town, by=list(comdata$date), FUN = function(x) sum(!is.na(x)))
+    colnames(RS_index.ex) <- c("Date","x")
+    RS_index.ex <- merge(RS_index.ex, RS_index, by="Date", all=TRUE)[,-2]
+    RS_index.ex[,3] <- RS_index.ex[,2]
+    RS_index.ex[,2] <- na.approx(RS_index.ex[,3], na.rm=FALSE)
+    #colnames(RS_index.ex) <- c("Date", produk[1])
+    return(RS_index.ex)
+}
+
+#==================
+#AGRICULTURAL PRODUCE (8 + 5): 
+#"wheat","barley","oats","oathay","rye","peas.beans","potatoes","tobacco",c("dried.fruit","d.fruit") 
+#c("wine","wine.better","wine.ordinary"),c("brandy","brandy.better","brandy.ordinary")
+crops <- cbind(wheat=makeindex("wheat")[,1:2],mealies=makeindex("mealies")[,1:2],barley=makeindex("barley")[,1:2],oats=makeindex("oats")[,1:2],
+               oathay=makeindex("oathay")[,1:2],rye=makeindex("rye")[,1:2],peas.beans=makeindex("peas.beans")[,1:2],
+               potatoes=makeindex("potatoes")[,1:2])
+crops <- crops[,c(1,2,4,6,8,10,12,14,16)]
+colnames(crops)[1] <- "Date"
+
+produce <- cbind(tobacco=makeindex("tobacco")[,1:2],d.fruit=makeindex(c("dried.fruit","d.fruit"))[,1:2],
+                 wine=makeindex(c("wine","wine.better","wine.ordinary"))[,1:2],brandy=makeindex(c("brandy","brandy.better","brandy.ordinary"))[,1:2]) 
+produce <- produce[,c(1,2,4,6,8)]
+colnames(produce)[1] <- "Date"
+
+#PASTORAL PRODUCTS (6): 
+#c("w.wool","u.wool"),"hides",c("sheep.skins","goat.skins"),"cheese","fat.tallow","soap"
+pastoral <- cbind(wool=makeindex(c("w.wool","u.wool"))[,1:2],hides=makeindex(c("hides"))[,1:2],skins=makeindex(c("sheep.skins","goat.skins"))[,1:2],
+                  cheese=makeindex("cheese")[,1:2],fat.tallow=makeindex("fat.tallow")[,1:2],soap=makeindex("soap")[,1:2]) 
+pastoral <- pastoral[,c(1,2,4,6,8,10,12)]
+colnames(pastoral)[1] <- "Date"
+
+#LIVESTOCK (6):
+#c("cattle","tr.oxen","mi.cows","d.oxen","m.cows"),c("s.horse","d.horse","mules","asses"),c("sheep","wo.sheep","w.sheep","c.sheep"),
+#"swine","goats",c("fowls","ducks")
+livestock <- cbind(cattle=makeindex(c("cattle","tr.oxen","mi.cows","d.oxen","m.cows"))[,1:2],horses=makeindex(c("s.horse","d.horse","mules","asses"))[,1:2],
+                   sheep=makeindex(c("sheep","wo.sheep","w.sheep","c.sheep"))[,1:2],swine=makeindex("swine")[,1:2],goats=makeindex("goats")[,1:2],
+                   fowls=makeindex(c("fowls","ducks"))[,1:2])
+livestock <- livestock[,c(1,2,4,6,8,10,12)]
+colnames(livestock)[1] <- "Date"
+
+#PROVISIONS (6 + 5 + 7): 
+#"beef","mutton",c("pork","bacon"),"eggs",c("butter","butter.fresh","butter.salt"),"bread",c("beer.eng","beer.col"),c("wheat.flour","flour"),"mealie.meal","boer.meal","oatmeal"
+#"tea","coffee","sugar","rice","salt","milk","candles"
+p.provisions <- cbind(beef=makeindex("beef")[,1:2],mutton=makeindex("mutton")[,1:2],pork=makeindex(c("pork","bacon"))[,1:2],
+                      eggs=makeindex("eggs")[,1:2],butter=makeindex(c("butter","butter.fresh","butter.salt"))[,1:2],milk=makeindex("milk")[,1:2])
+p.provisions <- p.provisions[,c(1,2,4,6,8,10,12)]
+colnames(p.provisions)[1] <- "Date"
+
+a.provisions <- cbind(bread=makeindex("bread")[,1:2],flour=makeindex(c("wheat.flour"))[,1:2],
+                      mealie.meal=makeindex("mealie.meal")[,1:2],boer.meal=makeindex("boer.meal")[,1:2],oatmeal=makeindex("oatmeal")[,1:2])
+a.provisions <- a.provisions[,c(1,2,4,6,8,10)]
+colnames(a.provisions)[1] <- "Date"
+
+o.provisions <- cbind(tea=makeindex("tea")[,1:2],coffee=makeindex("coffee")[,1:2],sugar=makeindex("sugar")[,1:2],beer=makeindex(c("beer.eng","beer.col"))[,1:2],
+                      rice=makeindex("rice")[,1:2],salt=makeindex("salt")[,1:2],candles=makeindex("candles")[,1:2])
+o.provisions <- o.provisions[,c(1,2,4,6,8,10,12,14)]
+colnames(o.provisions)[1] <- "Date"
+
+#Seasonal adjustment
+seisoen <- function(product) {
+    product[,-1] <- na.locf(product[,-1], na.rm=FALSE, fromLast=TRUE)
+    for(i in 2:ncol(product)) {
+        m <- ts(product[,i],start=c(1889,09), end= c(1914,7), frequency = 12)
+        dec <- decompose(m, "additive")
+        product[,i] <- as.numeric(m - dec$seasonal)
+    }
+    return(product)
+}
+
+crops <- seisoen(crops)
+produce <- seisoen(produce)
+pastoral <- seisoen(pastoral)
+livestock <- seisoen(livestock)
+p.provisions <- seisoen(p.provisions)
+a.provisions <- seisoen(a.provisions)
+o.provisions <- seisoen(o.provisions)
+```
+
+```{r figure4.11, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Individual commodity price indices"}
+#Plot examples for individual commodities
+product <- cbind(crops[,c(1,2)],produce[,2],livestock[,2],p.provisions[,2])
+colnames(product) <- c("Date","Wheat","Tobacco","Cattle","Beef")
+product[,-1] <- na.approx(product[,-1], na.rm=FALSE)
+
+index_plot <- product[,c(1,2)]
+g1 <- ggplot(index_plot, aes(x=Date,y=Wheat,group=1))
+g1 <- g1 + geom_line(colour="#F8766D")
+#g1 <- g1 + geom_point(colour="#F8766D",size=1)
+g1 <- g1 + theme(legend.title=element_blank())
+g1 <- g1 + ggtitle("Wheat Index") 
+g1 <- g1 + ylab("Index Value") + xlab("")
+g1 <- g1 + theme(legend.position="none")
+g1 <- g1 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g1 <- g1 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- product[,c(1,3)]
+g2 <- ggplot(index_plot, aes(x=Date,y=Tobacco,group=1))
+g2 <- g2 + geom_line(colour="#7CAE00")
+#g2 <- g2 + geom_point(colour="#7CAE00",size=1)
+g2 <- g2 + theme(legend.title=element_blank()) 
+g2 <- g2 + ggtitle("Tobacco Index") 
+g2 <- g2 + ylab("Index Value") + xlab("")
+g2 <- g2 + theme(legend.position="none")
+g2 <- g2 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g2 <- g2 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- product[,c(1,4)]
+g3 <- ggplot(index_plot, aes(x=Date,y=Cattle,group=1))
+g3 <- g3 + geom_line(colour="#00BFC4")
+#g3 <- g3 + geom_point(colour="#00BFC4",size=1)
+g3 <- g3 + theme(legend.title=element_blank()) 
+g3 <- g3 + ggtitle("Cattle Index") 
+g3 <- g3 + ylab("Index Value") + xlab("")
+g3 <- g3 + theme(legend.position="none")
+g3 <- g3 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g3 <- g3 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- product[,c(1,5)]
+g4 <- ggplot(index_plot, aes(x=Date,y=Beef,group=1))
+g4 <- g4 + geom_line(colour="#C77CFF")
+#g4 <- g4 + geom_point(colour="#C77CFF",size=1)
+g4 <- g4 + theme(legend.title=element_blank()) 
+g4 <- g4 + ggtitle("Beef Index") 
+g4 <- g4 + ylab("Index Value") + xlab("")
+g4 <- g4 + theme(legend.position="none")
+g4 <- g4 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g4 <- g4 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+grid.arrange(g1, g2, g3, g4, ncol=2, nrow =2)
+```
+
+The indices for the commodity groups are illustrated in Figures 4.12 and 4.13, and Figure 4.14 illustrates the total wholesale price index, with the recessionary periods shaded. The general trend in wholesale commodity price indices seems to conform to the literature on the economic history of the Cape Colony. 
+
+In general, wholesale prices remained relatively stable or decreased during the recessionary period of 1890 and the subsequent stagnant period up to 1894-95. From around 1895 commodity prices increased during the pre-war upswing phase. The prices for crops, produce, livestock and agricultural provisions decrease in 1897, which might reflect the recession that @Schumann1938 suspected in that year. Virtually all of the indices increased markedly during the war, with the total wholesale index reaching a peak in 1901. The exception is the general decline in the index for "Other Provisions" (e.g. tea and coffee). Prices remained at the high level and even increased in some cases during the post-war recovery up to 1904. In general, prices decreased thereafter though the post-war recession that ensued, until the end of the recession around the unification of the four colonies in 1910. Prices seem to be stable or increase slightly towards the end of the sample period. 
+
+In general, prices seem to have been highly cyclical over the period, with a large increase before and during the war and a large decrease after the war up to unification. This is similar to the large spike in South African wholesale commodity prices during WWI, with the peak in 1919, as reported in @Schumann1938. It also mirrors the wholesale prices in the US during three wartime periods reported in @Friedman1952. He showed that the peak in prices came approximately at the end of the US Civil War, a year and a half after the end of WWI, and three years after WWII. @Klovland2014b also found large commodity price inflation in Norway during wartime disturbances, such as the Napoleonic War and WWI. 
+
+@Schumann1938 described the Second South African War as the predominant cause of the most intense and significant economic fluctuation in the past. It was accompanied by a supply shock, especially for the Boer Republics, as well as a demand shock. From the supply-side, the war led to considerable destruction of crops and livestock in the Transvaal and the Orange Free State, and to a lesser extent in some parts of the Cape and Natal. Agriculture and stock farming were seriously disrupted in those regions [@DeKock1924].  On the demand side, the war cost Britain about £250 million, which was financed primarily through loans. It is estimated that some $300 million of British government loans were floated in New York market from 1900-1902 [@Friedman1963]. A large proportion was spent in the Cape Colony on agricultural and pastoral produce for the troops, which increased prices and stimulated production [@DeKock1924]. The inflationary episodes in the total wholesale index also seem to coincide with the expansions and contractions in the money supply, as will be discussed in more detail below.
+
+```{r weight, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+#Calculate commodity group indices
+gewig <- read.csv("Weights.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+
+weeg <- function(data,w) {
+    data <- data[,-1]
+    m <- ts(data,start=c(1889,9), end= c(1914,7), frequency = 12)
+    toets <- as.data.frame(diff(log(m)))
+    n <- ncol(toets)
+    for(i in 1:298) {
+        toets[i,n+1] <- weighted.mean(toets[i,1:n], w, na.rm=TRUE)
+        data[i+1,1] <- data[i,1]*exp(toets[i,n+1])
+    }
+    return(data[,1])
+}
+
+data <- a.provisions[,-7]
+w <- gewig[,31:35]
+
+crops$Crops <- weeg(crops[,1:9],gewig[,1:8])
+produce$Produce <- weeg(produce[,1:5],gewig[,9:12])
+pastoral$Pastoral <- weeg(pastoral[,1:7],gewig[,13:18])
+livestock$Livestock <- weeg(livestock[,1:7],gewig[,19:24])
+p.provisions$P.Provisions <- weeg(p.provisions[,1:7],gewig[,25:30])
+a.provisions$A.Provisions <- weeg(a.provisions[,1:6],gewig[,31:35])
+o.provisions$O.Provisions <- weeg(o.provisions[,1:8],gewig[,36:42])
+
+indices <- cbind(crops[,c("Date","Crops")],produce[,c("Date","Produce")],
+                 pastoral[,c("Date","Pastoral")],livestock[,c("Date","Livestock")],
+                 p.provisions[,c("Date","P.Provisions")],a.provisions[,c("Date","A.Provisions")],
+                 o.provisions[,c("Date","O.Provisions")])[,c(-3,-5,-7,-9,-11,-13)]
+colnames(indices) <- c("Date","Crops","Produce","Pastoral","Livestock","P.Provisions","A.Provisions","O.Provisions")
+indices$Total <- weeg(indices,gewig[,43:49])
+```
+
+```{r figure4.12, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Commodity group indices (1)"}
+#-----------------------------------------------
+#Plot commodity Groups
+index_plot <- indices[,c(1,2)]
+g1 <- ggplot(index_plot, aes(x=Date,y=Crops,group=1))
+g1 <- g1 + geom_line(colour="#F8766D")
+g1 <- g1 + theme(legend.title=element_blank())
+g1 <- g1 + ggtitle("Crops Index") 
+g1 <- g1 + ylab("Index Value") + xlab("")
+g1 <- g1 + theme(legend.position="none")
+g1 <- g1 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g1 <- g1 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- indices[,c(1,3)]
+g2 <- ggplot(index_plot, aes(x=Date,y=Produce,group=1))
+g2 <- g2 + geom_line(colour="#7CAE00")
+g2 <- g2 + theme(legend.title=element_blank()) 
+g2 <- g2 + ggtitle("Produce Index") 
+g2 <- g2 + ylab("Index Value") + xlab("")
+g2 <- g2 + theme(legend.position="none")
+g2 <- g2 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g2 <- g2 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- indices[,c(1,4)]
+index_plot[220:299,2] <- NA
+g3 <- ggplot(index_plot, aes(x=Date,y=Pastoral,group=1))
+g3 <- g3 + geom_line(colour="#00BFC4")
+g3 <- g3 + theme(legend.title=element_blank()) 
+g3 <- g3 + ggtitle("Pastoral Index") 
+g3 <- g3 + ylab("Index Value") + xlab("")
+g3 <- g3 + theme(legend.position="none")
+g3 <- g3 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g3 <- g3 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- indices[,c(1,5)]
+g4 <- ggplot(index_plot, aes(x=Date,y=Livestock,group=1))
+g4 <- g4 + geom_line(colour="#C77CFF")
+g4 <- g4 + theme(legend.title=element_blank()) 
+g4 <- g4 + ggtitle("Livestock Index") 
+g4 <- g4 + ylab("Index Value") + xlab("")
+g4 <- g4 + theme(legend.position="none")
+g4 <- g4 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g4 <- g4 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+grid.arrange(g1, g3, g2, g4, ncol=2, nrow =2)
+```
+
+```{r figure4.13, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Commodity group indices (2)"}
+index_plot <- indices[,c(1,6)]
+g1 <- ggplot(index_plot, aes(x=Date,y=P.Provisions,group=1))
+g1 <- g1 + geom_line(colour="#F8766D")
+g1 <- g1 + theme(legend.title=element_blank())
+g1 <- g1 + ggtitle("Pastoral Provisions Index") 
+g1 <- g1 + ylab("Index Value") + xlab("")
+g1 <- g1 + theme(legend.position="none")
+g1 <- g1 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g1 <- g1 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- indices[,c(1,7)]
+g2 <- ggplot(index_plot, aes(x=Date,y=A.Provisions,group=1))
+g2 <- g2 + geom_line(colour="#7CAE00")
+g2 <- g2 + theme(legend.title=element_blank()) 
+g2 <- g2 + ggtitle("Agri Provisions Index") 
+g2 <- g2 + ylab("Index Value") + xlab("")
+g2 <- g2 + theme(legend.position="none")
+g2 <- g2 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g2 <- g2 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- indices[,c(1,8)]
+index_plot[220:299,2] <- NA
+g3 <- ggplot(index_plot, aes(x=Date,y=O.Provisions,group=1))
+g3 <- g3 + geom_line(colour="#00BFC4")
+g3 <- g3 + theme(legend.title=element_blank()) 
+g3 <- g3 + ggtitle("Other Provisions Index") 
+g3 <- g3 + ylab("Index Value") + xlab("")
+g3 <- g3 + theme(legend.position="none")
+g3 <- g3 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g3 <- g3 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+index_plot <- indices[,c(1,9)]
+g4 <- ggplot(index_plot, aes(x=Date,y=Total,group=1))
+g4 <- g4 + geom_line(colour="#C77CFF")
+g4 <- g4 + theme(legend.title=element_blank()) 
+g4 <- g4 + ggtitle("Total Index") 
+g4 <- g4 + ylab("Index Value") + xlab("")
+g4 <- g4 + theme(legend.position="none")
+g4 <- g4 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g4 <- g4 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+
+grid.arrange(g1, g2, g3, g4, ncol=2, nrow =2)
+```
+
+```{r figure4.14, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="The Total Wholesale Index for the Cape Colony"}
+indicator_plot <- indices[,c("Date","Total")]
+g <- ggplot(indicator_plot) 
+g <- g + labs(color="Legend text")
+g <- g + geom_line(aes(x=Date, y=Total, colour="Total"), size = 1)
+g <- g + geom_rect(data=tp[-1:-7,], aes(xmin=Peaks, xmax=Troughs, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.5)
+g <- g + ylab("Index") + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g <- g + theme(legend.position="none")
+g
+```
+
+###Comparisons to CPI and the Money Supply
+In order to gauge whether the price indices provide sensible estimates and conform to the established trends in the price level, it might be useful to compare them to trends in the money supply and other price indices. This section compares the total wholesale price index (WPI) to the money supply for the Cape Colony, as well as to three CPIs estimated for the Cape Colony over the period. 
+
+The CPIs are only available at an annual frequency, and differ from the estimated WPI in terms of the underlying prices, composition, weighting and construction, which may lead to dissimilar movements in the indices [@Klovland2014a]. Nevertheless, it is of some interest to compare the indices to see whether they provide the same basic picture of price trends in the Cape Colony. The caveat in using the WPI as a gauge of inflation is that the products included are primarily agricultural goods and raw materials. As such, they omit some important non-agricultural products and services. Nevertheless, the WPI does include many more products than the CPIs. 
+
+Figure 4.15 compares the total WPI to the annual CPI indices for the Cape Colony reported in @DeZwart2011 and @Verhoef2014. As discussed above, @DeZwart2011 calculated CPI based on a "bare bones" and a "respectable" basket of goods for consumption. The monthly total WPI is converted to average annual values for the comparison. 
+
+```{r figure4.15, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Comparing the Total Wholesale Index to three CPIs for the Cape Colony"}
+indices$Year <- format(indices$Date,format="%Y")
+annual_index <- aggregate(Total ~ Year, indices, FUN=mean)
+annual_index$Total_Index <- annual_index$Total/annual_index$Total[1]*100
+
+maak_indeks <- function(indeks) {
+    for(i in 2:ncol(indeks)) {
+        indeks[,i] <- indeks[,i]/indeks[1,i]*100
+    }
+    return(indeks)
+}
+
+a_indices <- cbind(CPI[-1:-9,],annual_index$Total)
+a_indices$Date <- format(a_indices$Date,format="%Y")
+colnames(a_indices)[6] <- "WPI" 
+
+index_plot <- melt(maak_indeks(a_indices[,-5]), id="Date")  # convert to long format
+g <- ggplot(data=index_plot,aes(x=Date, y=value, group=variable, colour=variable)) 
+g <- g + geom_point(size = 1) 
+g <- g + geom_line()
+g <- g + ylab("Index") + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+g
+```
+
+Although the price levels seem to be comparable over the period, there is a large deviation between the WPI and the three CPIs, especially around the war period. The CPI based on the respectable consumption basket is the most similar to the WPI in that it is includes more products and is derived from similar prices reported in the Blue Books. Although there is a significant positive correlation of 0.7 between the two, reported in Table 6, the association seems quite weak. The correlation between the new WPI and the other two CPIs are not significant, which is perhaps to be expected given the differences in the composition, weighting and construction method. In general the WPI exhibits larger movements than the CPIs. Short-term cycles in the WPI are often more pronounced than in the CPI, because the WPI contains a larger share of producer goods (e.g. raw materials), which are often more sensitive to business cycles than consumer goods, due to the inelasticity of agricultural production [@Schumann1938; @Klovland2014a]. Movements in retail prices often exhibit a smaller amplitude or a greater stickiness than movements in wholesale prices, due to the many more constant cost elements, such as costs of distribution and fuel, light and rent entering into the retail price index [@Schumann1938]. 
+
+The WPI can also be compared to the movements in the money supply, in order to gauge if it provides a plausible history of inflation for the Cape Colony over this period. The caveat is that the WPI is not a perfect measure of wholesale prices, let alone a broader measure of the price level, as it places disproportionate emphasis on farm products and raw materials.
+
+Figure 4.16 compares the annual WPI to the rough measure of M1 money supply, as well as money supply per unit of output. The money supply per unit of output provides a simple gauge of the implied inflation history, based on the traditional Quantity Theory, given the tenuous assumption that the velocity of money was constant over the period [@Schumann1938; @Friedman1963]. According to @Friedman1952, inflation occurs when the money supply increases more rapidly than output. The WPI seems to follow the developments implied by the movements in the money supply quite closely. 
+
+Table 4.6 shows that the correlation in levels was significant. The correlation between the growth rates between the WPI and money supply per unit of output was only significant at a level of 10%. It should be borne in mind that these are rough measures, and one would not expect a one-to-one relationship, especially over the short-term. Nevertheless, the WPI seems to follow developments in the money supply much more closely than the existing measures of CPI, and may provide a more accurate and comprehensive picture of the inflation history of the period.
+
+```{r figure4.16, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Comparing the WPI to the Money Supply and Money per unit of Output"}
+money <- cbind(GDP[-1:-33,c("Date","GDP","Money_Supply")],annual_index$Total[-22:-26])
+colnames(money) <- c("Date","RGDP","Money_Supply","WPI")#,"Implied_Money")
+money$RGDP <- money$RGDP/money$WPI*100
+money$Implied_Money <- money$Money_Supply/money$RGDP
+
+indicator_plot <- money
+indicator_plot[,-1] <- scale(indicator_plot[,-1])
+indicator_plot <- melt(indicator_plot[,-2],id="Date")
+g <- ggplot(data=indicator_plot,aes(x=Date, y=value, group=variable, colour=variable)) 
+g <- g + labs(color="Legend text")
+g <- g + geom_line()
+g <- g + geom_point()
+g <- g + ylab("Index") + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+g
+```
+
+```{r table4.6, echo=FALSE, results='asis', warning=FALSE, message=FALSE, cache = TRUE}
+source("corstarsl.R")
+temp <- cbind(a_indices,Implied_Money=c(money[,5],NA,NA,NA,NA,NA))[,c(1,4,2,3,6,5,7)]
+xt <- xtable(corstarsl(temp[,-1]), caption="Correlations in Levels")
+print(xt, "latex",comment=FALSE, caption.placement = getOption("xtable.caption.placement", "top"), scalebox=0.8)
+```
+
+###Comparison to international wholesale prices
+Commodity prices in other countries may also provide a useful cross-check of the validity of the new price indices. Commodity prices in Britain, the colonial ruler and the Cape Colony's main trading partner at the time, might be particularly useful. The well-known Statist-Sauerbeck indices for Britain and the Warren-Persons indices for the US, as reported in @Warren1932, are used for the comparison. 
+
+Figure 4.17 illustrates the UK and Cape wheat price indices in the left panel and the wholesale price indices for the UK, US, and Cape in the right panel. Wheat prices appear to be closely linked in the period before the war, with peaks and a trough occurring quite close together. However, there were two peaks in Cape wheat prices during and after the war, which do not appear in the UK series. The series are at similar levels between 1905 and 1910, diverge markedly up to 1913, and then end on a similar levels. These high-frequency comparisons for the entire Cape Colony provide a slightly different and perhaps more nuanced picture than the long-term trends illustrated in @Boshoff2015. They found that Cape Town wheat prices started reflecting UK trends during the 1870s, soon after the mineral discoveries. 
+
+The wholesale price indices seem to follow a similar pattern during the first half of the 1890s. The decrease up to the middle of the 1890s conforms to the pattern of prices in many European countries, often referred to as the great deflation [@Klovland2014a]. However, after 1895 there is quite a large divergence between the indices, as the war seems to have affected the course of prices. The Cape WPI increases markedly before and during the war and then decreases dramatically up to Unification. The UK and US indices seem to follow pronounced cycles along an increasing trend. Nevertheless, there are similarities in the timing of price changes, e.g. increases in 1899, 1903, and 1913, and decreases in early 1890s, 1904, and 1907. Despite the differences in price indices, the new indices seem plausible.
+
+Because the currency of the Cape Colony was linked to the British pound throughout the period, the WPI comparison implies divergences from Purchasing Power Parity (PPP) over the period. However, because the estimated Cape WPI is heavily dependent on the prices of agricultural and raw materials, and because they include far fewer products than the UK and US indices, the comparisons should be used for illustrative purposes rather than precise calculations. Even if the indices captured price levels accurately, PPP is unlikely to hold exactly, even in periods with no impediments to trade and more stable and integrated commodity and financial markets [@Klovland2014a]. 
+
+```{r figure4.17, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Comparing Cape and International Wholesale Prices"}
+UK <- read.csv("UK.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+UK$Date <- indices$Date
+UK <- cbind(UK,Cape.WPI=indices$Total,
+            Cape.Wheat=na.approx(crops$wheat.Index,na.rm=FALSE))
+UK <- UK[,c(1,2,8,3:7)]
+
+index_plot <- melt(UK[,c(1:3)], id="Date")  # convert to long format
+g1 <- ggplot(data=index_plot,aes(x=Date, y=value, group=variable, colour=variable)) 
+#g1 <- g1 + geom_point(size = 1) 
+g1 <- g1 + geom_line()
+g1 <- g1 + ylab("Index")
+g1 <- g1 + xlab("")
+g1 <- g1 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g1 <- g1 + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+
+colnames(UK)[6] <- "US.WPI"
+index_plot <- melt(UK[,c(1,5,6,8)], id="Date")  # convert to long format
+g2 <- ggplot(data=index_plot,aes(x=Date, y=value, group=variable, colour=variable)) 
+#g2 <- g2 + geom_point(size = 1) 
+g2 <- g2 + geom_line()
+g2 <- g2 + ylab("")
+g2 <- g2 + xlab("")
+g2 <- g2 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g2 <- g2 + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+
+grid.arrange(g1, g2, ncol=2, nrow =1) 
+```
+
+###Pricing Dynamics
+The high-frequency prices can also be used to gain some insight into the pricing behaviour over this period of the Cape Colony's history. The general increase in prices (inflation) is the result of many adjustments. Only a fraction of prices change in a month and the price changes may vary in size. These dynamics describe pricing behaviour. Following @Ruch2016 this section investigates the frequency and size of price changes to gain some insight into the underlying inflation dynamics of pricing behaviour. Price changes are decomposed into an extensive margin, i.e. the fraction of prices changing in a specific month, and an intensive margin, i.e. the size of price changes. These attributes are then used to decompose inflation into more sticky and flexible components.
+
+A price change is defined as: $dp_{ikt} = (p_{ikt} - p_{ikt-1})*100$, where $p_{ikt}$ is the log price of a specific product $i$ in town $k$ in time $t$. For example, comparing wheat prices from a number of different towns from one month to the next. The mean of these price changes $dp_{it}$ is then calculated for each commodity over all the towns. Figure 4.18 plots the distribution (histogram) of the price changes, in 5% bands, as well as the distribution of the normalised price changes. The monthly changes are dominated by no change or small changes, with around 86% of changes smaller than 10% in either direction. Three very large price changes occurred for tobacco, cattle and sheep in 1900 during the war. For comparison, @Ruch2016 recently analysed the prices of the goods included in the current CPI and found that monthly price changes were dominated by no change, which accounted for 75%, while 80% of changes were smaller than 5% in either direction.
+
+```{r figure4.18, echo=FALSE, message=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="The size of price changes"}
+gewig2 <- read.csv("Weights2.csv", header=TRUE, sep=",",na.strings = "", skipNul = TRUE)
+
+allDup <- function(value) {  #remove duplicated values
+    duplicated(value) | duplicated(value, fromLast = TRUE)
+}
+comdata1 <- comdata[!allDup(comdata[,c("date","town")]),]
+
+dp <- data.frame()
+for(i in unique(comdata1$town)) {
+    temp <- comdata1[comdata1$town==i,]
+    for(j in 6:ncol(temp)) {
+        temp[-1,j] <- diff(log(temp[,j]), lag =1)*100
+    }
+    dp <- rbind(dp,temp[-1,])
+}
+
+adp <- aggregate(dp[,6:ncol(dp)], by=list(dp$date), FUN = function(x) mean(x, na.rm=TRUE))
+
+z <- melt(adp[,-1]/100,by=colnames(adp[,-1]))
+g1 <- ggplot(z) 
+g1 <- g1 + geom_histogram(aes(x=value),binwidth=0.05) 
+g1 <- g1 + xlab("Distribution of price changes")
+g1 <- g1 + scale_x_continuous(limits=c(-0.5, 0.6))
+
+z <- scale(adp[,-1]/100) 
+z <- melt(z,by=colnames(z))[,-1]
+g2 <- ggplot(z) 
+g2 <- g2 + geom_histogram(aes(x=value,y=..density..),binwidth=0.5) 
+g2 <- g2 + xlab("Distribution of normalised price changes")
+g2 <- g2 + scale_x_continuous(breaks = seq(-5, 6, 1),limits=c(-5, 6))
+
+grid.arrange(g1, g2, ncol=2, nrow =1) 
+```
+
+An indicator variable is created to calculate the frequency of price changes: $$I_{ikt} = \begin{cases} 1,& \text{if } dp_{ikt} \neq 0\\ 0,& \text{otherwise }\\ \end{cases}$$ The mean of the indicator variable $I_{it}$ is then calculated for each commodity over all the towns, as above. The indicator variable $I_{it}$ is therefore equal to the mean frequency of price changes. Figure 4.19 illustrates the annual mean and median of the frequency of monthly price changes over the period. The means and medians are similar, with averages of 59% and 60% over the sample period. The frequency of price changes is relatively high initially, increases during the war and then decreases thereafter. The weighted versions very similar. The inverse of the frequency measure provides a rough approximation of the duration in months between price changes. The mean frequency implies that the prices of goods changed on average every 1.6 months, or 50 days. For comparison, @Ruch2016 found that the prices of the goods included in the current CPI changed every 3.6 months (according to the mean frequency). One would expect more frequent and larger price changes in the historical sample, because of the inclusion of mostly agricultural goods and raw materials.
+
+```{r figure4.19, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="The frequency of price changes"}
+fr <- dp
+fr[,6:ncol(fr)] <- ifelse(fr[,6:ncol(fr)]!=0,1,0)
+Ind <- aggregate(fr[,6:ncol(fr)], by=list(fr$date), FUN = function(x) mean(x, na.rm=TRUE))
+#for(i in 1:272) { Ind$Mean[i] <- weighted.mean(Ind[i,2:25], gewig2, na.rm=TRUE)}
+Ind$Mean <- rowMeans(Ind[,-1],na.rm=TRUE)
+Ind$Median <- Ind$Mean
+for(i in 1:272) { Ind$Median[i] <- median(as.numeric(Ind[i,2:25]),na.rm=TRUE)}
+
+indicator_plot <- merge(crops[,1:2],Ind[,c(1,26,27)],by.x="Date",by.y="Group.1",all=TRUE)[,-2]
+indicator_plot$Year <- format(indicator_plot$Date,format="%Y")
+indicator_plot <- aggregate(. ~ Year, indicator_plot, FUN=mean)[,-2]
+colnames(indicator_plot) <- c("Date","Mean","Median")
+
+index_plot <- melt(indicator_plot, id="Date")  # convert to long format
+g <- ggplot(data=index_plot,aes(x=Date, y=value, group=variable, colour=variable)) 
+g <- g + geom_point(size = 1) 
+g <- g + geom_line()
+g <- g + ylab("Percentage frequency of price changes") + xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+g 
+```
+
+These calculations may be used to decompose inflation into more sticky and more flexible components. This provides another useful cross-check of the inflation history, this time using only the data from the Agricultural Journals. However, the resulting sticky price inflation does not really reflect "core" inflation as it is typically defined, given that most of the products are agricultural goods. 
+
+The first step is to calculate the weighted inflation rates from the average price changes for each commodity $dp_{it}$ for all the towns. The 1904 census weights are applied to calculated weighted price changes; the same weights as were used to calculate the overall WPI: $\pi_{it} = w_{it} (p_{it} - p_{it-1})$, where $\pi_{it}$ is monthly inflation, $w_{it}$ is the production value weight, and $p_{it}$ is the log price of a specific product $i$ in time $t$. 
+
+The next step is to decompose inflation into sticky and flexible price inflation components: 
+$$\pi_{it} = \pi^S_{t} + \pi^F_{t}$$ 
+$$\pi_{it} = \sum^n_{i=1} w_{it} I^S_i \pi_{it} + \sum^n_{i=1} w_{it} I^F_i \pi_{it}$$
+where $\pi_{it}$ is the month-on-month inflation rate; $\pi^S_{t}$ and $\pi^F_{t}$ are sticky and flexible price inflation; $w_{it}$ are the weights for each commodity; $I^S_i$ is an indicator variable equal to 1 if $I_{i} \leq T$ and 0 otherwise; $I^F_i$ is an indicator variable equal to 1 if $I_{i} > T$ and 0 otherwise; $T$ is an arbitrary threshold value for the frequency of price changes determining which prices are considered sticky or flexible. 
+
+A somewhat arbitrary value of 55% is used as the threshold value $T$ for determining which products should be considered flexible or sticky. Using this threshold value led to the inclusion of tobacco, meat (e.g. beef) and livestock (e.g. cattle) prices in the sticky index, as they tended to change less frequently. Products such as wheat, mealies, butter and eggs were included in the flexible index, as they tended to change more frequently.
+
+Figure 4.20 illustrates the monthly year-on-year inflation rates for overall, sticky and flexible inflation, based on a frequency change threshold of 55%, as well as the inflation rate from the WPI. The missing values for the decomposed inflation rates are interpolated with the WPI inflation values. The results are similar if it is assumed that there were no changes in the missing periods. The decomposition of inflation into these components generates a more volatile flexible price inflation series with higher amplitude, and a more persistent sticky-price inflation index that may capture underlying inflation trends. The WPI and the decomposed inflation rates are similar and highly correlated (0.76, 0.71, and 0.72), even though the calculation of inflation is different to the repeat sales method employed above (i.e. it is the weighted sum of inflation rates including only the Agricultural Journal data). The biggest difference is the higher inflation rates in 1899 for the WPI, which is due to inclusion of the extra products in the Blue Books. 
+
+```{r figure4.20, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Decomposition of inflation"}
+for(i in 1:272) { adp$Pi[i] <- weighted.mean(adp[i,2:25], gewig2, na.rm=TRUE)}
+
+I_s <- Ind
+I_f <- Ind
+for(i in 2:25) {
+    if(mean(Ind[,i],na.rm=TRUE)<=0.55) {
+        I_s[!is.na(I_s[,i]),i] <- 1
+    } else {
+        I_s[!is.na(I_s[,i]),i] <- 0
+    }
+    if(mean(Ind[,i],na.rm=TRUE)>0.55) {
+        I_f[!is.na(I_f[,i]),i] <- 1
+    } else {
+        I_f[!is.na(I_f[,i]),i] <- 0
+    }
+}
+
+adp$Pi_s <- rowMeans(I_s[,2:25]*adp$Pi, na.rm=TRUE)
+adp$Pi_f <- rowMeans(I_f[,2:25]*adp$Pi, na.rm=TRUE)
+
+check <- indices[,c("Date","Total")]
+check$Total[-1] <- diff(log(check$Total))*100
+check <- check[-1,]
+check <- merge(check,adp[,c("Group.1","Pi","Pi_s","Pi_f")],by.x="Date",by.y="Group.1",all=TRUE)
+
+#Interpoleer opsies:
+#check[is.na(check)] <- 0
+for(i in 1:298) { 
+    if(is.na(check[i,3:5])) { check[i,3:5] <- check[i,2] }
+}
+
+check2 <- indices[,1:5]
+colnames(check2) <- c("Date","WPI","Pi","Pi_s","Pi_f")
+for(i in 2:299) {
+    check2[i,2:5] <- check2[(i-1),2:5]*(1+check[i,2:5]/100)
+    #check2[i,2:5] <- check[i,2:5]*100
+}
+
+#Annual inflation
+check3 <- check2[-1:-12,]
+for(i in 2:5) {
+    check3[,i] <- diff(log(check2[,i]), lag=12)
+}
+
+index_plot <- melt(check3, id="Date")  # convert to long format
+g <- ggplot(data=index_plot,aes(x=Date, y=value, group=variable, colour=variable)) 
+g <- g + geom_line()
+g <- g + ylab("Inflation rate")+ xlab("")
+g <- g + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g <- g + theme(legend.title=element_blank()) + theme(legend.position="bottom")
+g <- g + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g
+```
+
+###Summary
+The wholesale commodity price indices estimated with the repeat sales method seem to conform to the economic history of the Cape Colony. The wholesale price indices provide some insights into the supply and demand developments over the period, especially around the Second South African War. In general, prices seem to have been highly cyclical over the period, with a large increase before and during the war and a large decrease after the war up to Unification. The total WPI seems plausible when compared to international price indices and seems to reflect the monetary history better than the existing CPIs. The pricing behaviour indicates that monthly changes were dominated by zero or small changes, with around 86% of changes smaller than 10% in either direction. The frequency of price changes was relatively high, with the prices of goods changing on average every 50 days. The following section presents some evidence on the course of internal market integration in the Cape Colony over this period.
+
+##Market Integration
+Little is known about regional market integration in the Cape Colony around the turn of the 20th century, which was presumably aided by the development of the railways. As discussed above, market integration occurs along two dimensions: convergence and efficiency. The equilibrium level of prices should be equal (i.e. the law of one price must hold), and prices should return quickly to this equilibrium after a shock (i.e. markets must show some degree of efficiency) [@Chilosi2013]. 
+
+The first dimension therefore concerns how close prices are throughout the economy for the same goods. Increasing integration should feature a decline in price gaps or dispersion, which might be due to decreasing transportation costs [@Andrabi2010]. That is why it is particularly instructive to study this period in the Cape Colony, when there was large development of the railway infrastructure. The second dimension features an increase in the speed with which price gaps return to equilibrium after a shock, which is the outcome of arbitrage by profit-seeking traders. This reflects growing market efficiency, especially through better circulation of information about prices and fundamentals [@Federico2013]. 
+
+The literature divides the tests of market integration into tests for convergence of the price levels and tests of market efficiency. Testing price gaps or dispersion can be done by looking at pairwise trends in relative prices or, for a large number of markets, by trends in the coefficient of variation. Testing efficiency typically involves tests of time-series comovement and cointegration, as well as variance tests for individual localities [@Federico2012].
+
+This section builds on the work of @Boshoff2015, by focusing specifically on the first dimension of market integration, and expanding the period and set of products used in their analysis. This section examines both absolute price gaps and cross-sectional price dispersion between the towns in the Cape Colony. By using actual prices rather than indices, this section provides insight into the size of price gaps and how they evolved over time [@Klovland2005]. 
+
+@Federico2013 argues that price level convergence is more important than the adjustment to equilibrium (i.e. efficiency), as actual price dispersion determines decisions by consumers and producers. Moreover, the high-frequency price series for the individual towns have large gaps, which is the reason for implementing the repeat sales regression above. To implement the time series tests for efficiency (e.g. cointegration tests) would require the interpolation of large parts of the commodity price series for the individual towns to form continuous series. In many cases, therefore, large parts of specific commodity-town series would just be straight lines between two observations with no variation, which would bias the tests of market integration. This section therefore focuses on tests of convergence.
+
+The tests are carried out for a number of commodities, as opposed to focusing on wheat, which is most the common commodity analysed in the literature [@Klovland2005]. @Federico2012 found substantial differences between patterns of convergence for different commodities in the first half of the 19th century in Europe and concluded that one should be very cautious in extending results for wheat to all commodities. @Boshoff2016 found that using wheat to measure market integration may result in a downward bias, i.e. a market may appear more integrated. Using aggregated commodity indices may mask different trends for the individual commodities. The examination of price behaviour at the individual commodity level should be the most appropriate way of evaluating trends in commodity prices [@Razzaque2007]. This section tries to provide some evidence of which commodity markets were integrated and which were not.
+
+###Tests of Market Integration
+Most of the literature on market integration is based on the intuitive idea that when trading costs are small and traders share information, price differences are quickly arbitraged away and prices converge [@Chilosi2013]. Price convergence is arguably the most direct way of gauging market integration [@ORourke2004; @Federico2012], based directly on the law of one price. In a competitive equilibrium, price differences are equal to trading costs [@Chilosi2013]. If trading costs are smaller than price differences, traders would arbitrage away the differential to make a profit. Thus, arbitrage should ensure that homogeneous commodities sell for one price, after taking account of trading costs.
+
+@Andrabi2010 presents a simple model that explains how reducing transport costs, e.g. through the development of railways, should reduce price dispersion. Assuming that transport costs are proportional (i.e. in the simplest "iceberg" form), a fraction $f$ of the good melts in transit. Let $P_A$ be the price of a commodity in market $A$ and $P_B$ be the price in market $B$. It is profitable to transport the commodity from market $A$ to market $B$ if $(1 - f) P_B > P_A$ or $1 - f > P_A/P_B$. Transportations in the reverse direction would only occur if $(1 - f) P_A > P_B$ or $P_A/P_B > 1/ (1 - f)$. The band within which relative prices can fluctuate is $(1 - f) < P_A/P_B < 1/(1 - f)$. Arbitrage should push relative prices back into the band. This model illustrates why lower transport costs should narrow the band and reduce price dispersion [@Andrabi2010].
+
+The law of one price may not hold for several reasons, such as incomplete information, search costs, transportation costs, trade barriers, and menu costs. If markets trade, prices can be perfectly equal only if trading costs are zero. In this situation the best way to gauge market integration is to measure the extent to which prices of the same commodities converge over time [@ORourke2004]. Convergence (or divergence) in prices between two locations can be examined from a simple graph of relative prices or dispersion, or estimated more formally with a regression of trends in prices [@Federico2012].
+
+This section uses two relatively simple measures of cross-sectional dispersion in prices. The first is based on the measure of absolute deviations suggested by @Klovland2005, which examines the development of the annual absolute deviations over time. For a group consisting of $K$ towns, the absolute deviation (AD) for commodity $i$ is defined as: $AD_{it} = 1/K \sum^K_{k=1} Abs(1- \frac{P_{kit}}{P^M_{it}})$, where $P_{kit}$ is the price of commodity $i$ in town $k$ month $t$, and $P^M_{it}$ is the average price of commodity $i$ in month $t$ across all the towns. $AD_{it}$ is therefore a measure of the average absolute deviation for a specific commodity across all of the towns over time. The absolute value is used to avoid positive and negative price gaps averaging out. This measure reflects the extent of deviations from the law of one price over time. If price gaps between individual commodities within a group are large for many price series, the index will show relatively high values. Consider two extreme cases. If the law of one price held exactly for all the towns, $AD_{it}$ would equal zero, whereas and if price gaps were 100%, the measure would equal 1. A decreasing absolute deviation over time implies absolute price convergence [@Klovland2005]. 
+
+The second measure looks at dispersion by computing the cross-sectional coefficient of variation (CV), i.e. the standard deviation normalised by the mean. The CV is a popular measure for investigating price convergence in the literature (e.g. see @Federico2012, @Federico2013, @Chilosi2013). A decreasing coefficient of variation over time implies price convergence and increasing market integration.
+
+To test this formally the trend in these two measures can be explored by running the following log-linear regression on either the AD or CV series: $ln CV_t = \alpha + \beta TIME + \epsilon_t$. A negative and significant coefficient for the trend variable $TIME$ is evidence of convergence and of integration. This model assumes that the process is trend-stationary. Unit root tests indicate that this is the case for most of the AD and CV series. 
+
+However, a number of authors (e.g. @Bleaney1993, @Razzaque2007, @Federico2012) have estimated more general error-correction model to take into account the possibility that the series follows a difference-stationary process: $\delta lnCV_t = \alpha + \beta TIME + \psi lnCV_{t-1} + \phi \delta lnCV_{t-1} + \epsilon_t$. This model is in the form of the Augmented Dickey-Fuller unit root test, which encompasses both the trend and difference stationary models [@Razzaque2007]. The lagged dependent variable is included to take account of potential serial correlation.  
+
+There are four possibilities [@Bleaney1993]. If $\beta = 0$ and $\psi = 0$, the series has a random walk with zero mean. If $\beta = 0$ and $-1 < \psi < 0$, the series has no long term but tends to be pulled back towards its historic mean. If $\beta \neq 0$ and $\psi = 0$, the series has a random walk with drift, so that if $\beta$ is negative, it is more probable that it will be less than its current value. If $\beta \neq 0$ and $-1 < \psi < 0$, the series has a non-zero deterministic trend to which it reverts after a shock. The long-run trend rate can be computed as $t = -(\beta/\psi)$. A negative trend implies long-run convergence and integration [@Federico2012]. The following section presents the results for the tests of convergence.
+
+###Integration Results
+Figure 4.21 and Figure 4.22 illustrate the monthly AD and CV measures for selected commodities. The two measures of price dispersion seem to provide very similar information. The absolute deviations and coefficients of variation are relatively low for these commodities. For comparison, @Federico2013 found that the coefficient of variation for wheat prices in European markets declined from a peak of slightly below 0.4 during the Napoleonic wars to about 0.10-0.15 in the heyday of free trade in the 1870s. In this sample, the CV for wheat was around 0.15 over the period. Both measures suggest a declining trend over the sample period. 
+
+```{r ABS, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+#Absolute changes
+comdata1 <- comdata[comdata$town %in% cape,]
+toets2 <- crops[,1:2] 
+    
+for(i in colnames(comdata1[6:29])) {
+    toets <- dcast(date ~ town, value.var = i, data=comdata1, mean)
+    toets$Mean <- rowMeans(toets[,-1],na.rm=TRUE)
+    toets1 <- abs(1-toets[,-1]/toets$Mean)
+    toets1$Mean <- rowMeans(toets1[,-1],na.rm=TRUE)
+    toets2 <- cbind(toets2,i=toets1$Mean)
+}
+ABS <- toets2[,-2]
+colnames(ABS)[-1] <- colnames(comdata1[6:29])
+ABS[1:14,"cattle"] <- rowMeans(ABS[1:14,c("tr.oxen","mi.cows")],na.rm=TRUE)
+ABS[1:14,"sheep"] <- ABS[1:14,c("wo.sheep")]
+```
+
+```{r figure4.21, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Average absolute deviations over time for selected commodities"}
+index_plot <- ABS[,c("Date","wheat","mealies")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g1 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g1 <- g1 + geom_line()
+g1 <- g1 + theme(legend.title=element_blank())
+g1 <- g1 + ylab("Abs") + xlab("")
+g1 <- g1 + theme(legend.position="bottom")
+g1 <- g1 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g1 <- g1 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g1 <- g1 + theme(legend.margin=unit(-0.2, "cm"))
+
+index_plot <- ABS[,c("Date","butter","eggs")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g2 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g2 <- g2 + geom_line()
+g2 <- g2 + theme(legend.title=element_blank())
+g2 <- g2 + ylab("") + xlab("")
+g2 <- g2 + theme(legend.position="bottom")
+g2 <- g2 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g2 <- g2 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g2 <- g2 + theme(legend.margin=unit(-0.2, "cm"))
+
+index_plot <- ABS[,c("Date","oathay","tobacco")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g3 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g3 <- g3 + geom_line()
+g3 <- g3 + theme(legend.title=element_blank())
+g3 <- g3 + ylab("Abs") + xlab("")
+g3 <- g3 + theme(legend.position="bottom")
+g3 <- g3 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g3 <- g3 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g3 <- g3 + theme(legend.margin=unit(-0.2, "cm"))
+
+index_plot <- ABS[,c("Date","beef","mutton")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g4 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g4 <- g4 + geom_line()
+g4 <- g4 + theme(legend.title=element_blank())
+g4 <- g4 + ylab("") + xlab("")
+g4 <- g4 + theme(legend.position="bottom")
+g4 <- g4 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g4 <- g4 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g4 <- g4 + theme(legend.margin=unit(-0.2, "cm"))
+
+library(gridExtra)
+grid.arrange(g1, g2, g3, g4, ncol=2, nrow =2)
+```
+
+```{r CV, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+#Coefficient of variation
+CV <- aggregate(rscomdata$price, by=list(rscomdata$date,rscomdata$commodity), 
+                FUN = function(x) sqrt(var(x,na.rm = TRUE))/mean(x,na.rm = TRUE))
+
+CV <- dcast(Group.1 ~ Group.2,value.var = "x", data=CV, mean)
+colnames(CV)[1] <- "Date"
+CV <- CV[,colnames(ABS)]
+CV[1:14,"cattle"] <- rowMeans(CV[1:14,c("tr.oxen","mi.cows")],na.rm=TRUE)
+CV[1:14,"sheep"] <- CV[1:14,c("wo.sheep")]
+```
+
+```{r figure4.22, echo=FALSE, warning=FALSE, cache = TRUE, fig.height=4.5, fig.width=7.5, fig.cap="Coefficient of Variation over time for selected commodities"}
+index_plot <- CV[,c("Date","wheat","mealies")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g1 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g1 <- g1 + geom_line()
+g1 <- g1 + theme(legend.title=element_blank())
+g1 <- g1 + ylab("CV") + xlab("")
+g1 <- g1 + theme(legend.position="bottom")
+g1 <- g1 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g1 <- g1 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g1 <- g1 + theme(legend.margin=unit(-0.2, "cm"))
+
+index_plot <- CV[,c("Date","butter","eggs")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g2 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g2 <- g2 + geom_line()
+g2 <- g2 + theme(legend.title=element_blank())
+g2 <- g2 + ylab("") + xlab("")
+g2 <- g2 + theme(legend.position="bottom")
+g2 <- g2 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g2 <- g2 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g2 <- g2 + theme(legend.margin=unit(-0.2, "cm"))
+
+index_plot <- CV[,c("Date","oathay","tobacco")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g3 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g3 <- g3 + geom_line()
+g3 <- g3 + theme(legend.title=element_blank())
+g3 <- g3 + ylab("CV") + xlab("")
+g3 <- g3 + theme(legend.position="bottom")
+g3 <- g3 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g3 <- g3 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g3 <- g3 + theme(legend.margin=unit(-0.2, "cm"))
+
+index_plot <- CV[,c("Date","beef","mutton")]
+index_plot <- melt(index_plot, id="Date")  # convert to long format
+g4 <- ggplot(index_plot, aes(x=Date,y=value,group=variable,colour=variable)) 
+g4 <- g4 + geom_line()
+g4 <- g4 + theme(legend.title=element_blank())
+g4 <- g4 + ylab("") + xlab("")
+g4 <- g4 + theme(legend.position="bottom")
+g4 <- g4 + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5))
+g4 <- g4 + scale_x_date(labels = date_format("%Y"),breaks = date_breaks("year"))
+g4 <- g4 + theme(legend.margin=unit(-0.2, "cm"))
+
+library(gridExtra)
+grid.arrange(g1, g2, g3, g4, ncol=2, nrow =2)
+```
+
+To test this more formally, the simple model (Model 1), as well as the extended error-correction form (Model 2) were estimated using both measures for 15 commodities.[^16] The lagged level dependent variable $\psi$ was negative and significant in all cases (using the Dickey-Fuller distribution), except for boer meal. For the most part the diagnostic tests for normality, homoscedasticity, and no serial correlation are satisfied. 
+
+[^16]: The following products were excluded because of limited data: lucerne hay, bread, pigs, and horses. The prices for oxen, cows, and woolled sheep were incorporated into the series for cattle and sheep.  
+
+Table 4.7 reports the coefficients for the time trend variable $\beta$ for Model 1 and the long-run trend rate $t = -(\beta/\psi)$ for Model 2. Overall there seems to be relatively strong evidence of convergence, as 12 of the 15 commodities showed some evidence of a declining trend over the sample period. There is strong evidence of convergence for wheat flour, mealies, oats, oathay, tobacco, butter, and eggs, in the sense that all the models point to a significant negative trend. There is weaker evidence of convergence for wheat, potatoes, beef, mutton, and cattle, in the sense that the simpler models point to a decreasing trend. The commodities that did not converge over the period, mealie meal and barley, already had low values of price dispersion and seem to revert towards its historic mean.
+
+The significant monthly trend rates imply annual growth rates that range between -0.48% and -3.67% per annum for Model 1 and between -0.53% and -1.12% per annum for Model 2. This seems to be in line with the literature. For example, in similar exercises, @Federico2013's estimates range between -0.5 and -1.75 per annum, and @Razzaque2007's range between -0.8% and -1.4% for one dataset and -0.92% and -3.27% for another dataset.
+
+```{r integration, echo=FALSE, results='hide', message=FALSE, warning=FALSE, cache = TRUE}
+trends <- function(y,lags=1) {
+    y <- log(y)
+
+    lags <- lags + 1
+    z <- diff(y)
+    n <- length(z)
+    x <- embed(z,lags)
+    z.diff <- x[,1]
+    z.diff.lag = x[,2:lags]
+    z.lag.1 <- y[lags:n]
+    tt <- lags:n
+    time <- 1:length(y)
+    
+    m1 <- lm(y ~ time)
+    m2 <- lm(z.diff ~ z.lag.1 + 1 + tt + z.diff.lag)
+    s1 <- summary(m1)$coefficients[2,c(1,4)]
+    s2 <- c(summary(m2)$coefficients[3,c(1,4)],-summary(m2)$coefficients[3,c(1)]/summary(m2)$coefficients[2,c(1)])
+    
+    tafel <- rbind(s1,s2)
+    return(tafel)
+}
+
+options(scipen=999)
+tafel <- data.frame()
+for(i in 2:18) {
+    tafel <- rbind(tafel,trends(ABS[,i]))
+}
+mystars <- ifelse(tafel[,2] < .01, "***", ifelse(tafel[,2] < .05, "** ", ifelse(tafel[,2] < .1, "* ", " ")))
+tafel <- round(tafel, 5)
+tafel[,1] <- paste(tafel[,1], mystars, sep="") 
+tafel[,3] <- paste(tafel[,3], mystars, sep="") 
+tafel1 <- tafel[seq(1,33,by=2),1]
+tafel1 <- cbind(tafel1,tafel[seq(2,34,by=2),c(3)])
+colnames(tafel1) <- c("Model1","Model2")
+row.names(tafel1) <- colnames(ABS)[2:18]
+
+options(scipen=999)
+tafel <- data.frame()
+for(i in 2:18) {
+    tafel <- rbind(tafel,trends(CV[,i]))
+}
+mystars <- ifelse(tafel[,2] < .01, "***", ifelse(tafel[,2] < .05, "** ", ifelse(tafel[,2] < .1, "* ", " ")))
+tafel <- round(tafel, 5)
+tafel[,1] <- paste(tafel[,1], mystars, sep="") 
+tafel[,3] <- paste(tafel[,3], mystars, sep="") 
+
+tafel2 <- tafel[seq(1,33,by=2),1]
+tafel2 <- cbind(tafel2,tafel[seq(2,34,by=2),c(3)])
+#tafel1[,3] <- tafel1[,3]*100*12
+colnames(tafel2) <- c("Model1","Model2")
+row.names(tafel2) <- colnames(ABS)[2:18]
+
+tafel <- cbind(tafel1,tafel2)
+tafel <- rbind(c("Model1","Model2","Model1","Model2"), tafel)
+row.names(tafel)[1] <- " "
+tafel <- tafel[-10,]
+```
+
+```{r table4.7, echo=FALSE, results='asis', warning=FALSE, message=FALSE, cache = TRUE}
+xt <- xtable(tafel, caption="Coefficients of Time Trends")
+addtorow <- list()
+addtorow$pos <- list(0)
+addtorow$command <- paste0(paste0('& \\multicolumn{2}{c}{  Absolute Deviation  } & \\multicolumn{2}{c}{ Coefficient of Variation }', 
+                                  collapse=''), '\\\\')
+print(xt, "latex",comment=FALSE, add.to.row=addtorow, include.colnames=F,
+      caption.placement = getOption("xtable.caption.placement", "top"),scalebox=0.9)
+```
+
+Although the data is patchy and the evidence necessarily imperfect, the results indicate that there was increasing market integration between towns in the Cape Colony over the sample period, despite the destruction and displacement caused by the war. In all likelihood this was aided by the development of the railway network. A number of railway lines had been completed just before or during the sample period, and there was significant investment in branch lines to act as feeders to the trunk lines or as connections between them. Rail transport seems to have substituted expensive road transport to the interior, creating a somewhat integrated market for commodities transported along the rail network. This confirms the findings in @Boshoff2015.  
+
+While the development of railways was no doubt important, it was not the only factor have could have helped with market integration [@Andrabi2010]. There were also a number of significant changes in technology and infrastructure, such as telegraphs and roads, occurring before and during this time which could have contributed to price convergence. Better information sharing throughout the country may have alerted producers to large price differences of which they could take advantage. The unification of the four colonies probably also contributed, through institutional changes such as the elimination of internal tariffs and the use of a common currency. 
+
+##Conclusion
+This paper has attempted to make a contribution to the quantitative history of the Cape Colony using a newly digitised historical dataset of high frequency (i.e. monthly) prices from 1889 to 1914. The primary aim was to create historical monthly wholesale price indices for the Cape Colony from, using the repeat sales method. The wholesale price indices display a relatively strong cyclical trend, which accords quite well with the historical narrative on the economic history of the Cape Colony. In general, prices seem to have been highly cyclical over the period, with a large increase before and during the Second South African War (1899-1902) and a large decrease up to Unification (1910). The total WPI seems plausible when compared to international price indices and seems to reflect the monetary history better than the existing CPIs. Hopefully the insight into the price history of the Cape Colony can shed new light on selected episodes in the economic and financial history. In wartime periods the price level may be among the few available time series that can be accurately measured, and may convey information on the state of the economy [@Klovland2014a]. Further research could include other sources of prices, and potentially prices in the other territories in South Africa, i.e. the Transvaal, Natal and the Orange Free State. Another extension would be to include import and export prices in the analysis.
+
+The secondary aim was to use the high-frequency price data to investigate internal market integration in the Cape Colony. The tests focused on convergence of relative prices and dispersion. The results indicate that there was increasing market integration between towns in the Cape Colony over the sample period, in all likelihood this was aided by the development of the railway network. Potential further research could perhaps investigate convergence along regional lines or along the main railway lines. Another extension would be to investigate the efficiency dimension of market integration, using time series tests. The factors that aided the integration could also be investigated, as well as the impact of market integration on welfare and long term growth [@Federico2012]. 
+
+\newpage
+##Appendix
+```{r ap1, echo=FALSE, results='asis',warning=FALSE, message=FALSE, cache = TRUE, fig.pos='H'}
+suppressMessages(library(xtable))
+
+all_indices <- read.csv("WPIs.csv")[,-1]
+all_indices1 <- all_indices[,c(1,9,1,9,1,9,1,9,1,9,1,9)]
+#all_indices1[1:52,1:2] <- all_indices[1:50,c(1,9)]
+all_indices1[1:50,3:4] <- all_indices[51:100,c(1,9)]
+all_indices1[1:50,5:6] <- all_indices[101:150,c(1,9)]
+all_indices1[1:50,7:8] <- all_indices[151:200,c(1,9)]
+all_indices1[1:50,9:10] <- all_indices[201:250,c(1,9)]
+all_indices1[1:49,11:12] <- all_indices[251:299,c(1,9)]
+all_indices1 <- all_indices1[1:50,]
+all_indices1[50,11:12] <- NA
+colnames(all_indices1) <- c("Date","WPI","Date","WPI","Date","WPI","Date","WPI","Date","WPI","Date","WPI")
+
+xt <- xtable(all_indices1, caption="Total Wholesale Price Index")
+print(xt, "latex",comment=FALSE, include.rownames=FALSE,
+      caption.placement = getOption("xtable.caption.placement", "top"),scalebox=0.6)
+
+```

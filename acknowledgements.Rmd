@@ -1,0 +1,9 @@
+---
+output: pdf_document
+fontsize: 12pt
+---
+
+\normalsize
+A PhD is a long and arduous journey full of self-doubt, losing battles, taking a few steps back and suffering.
+
+Wimpie, George, Johan, Jaco and the GEM group. Elize and family.

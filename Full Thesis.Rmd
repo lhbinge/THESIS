@@ -1,0 +1,113 @@
+---
+output: 
+    pdf_document:
+        fig_caption: yes
+        number_sections: true
+fontsize: 12pt
+geometry: margin=1in
+bibliography: References.bib
+csl: harvard.csl
+header-includes:
+- \usepackage{placeins}
+- \usepackage{fancyhdr}
+- \usepackage{setspace}
+- \usepackage{chngcntr}
+- \counterwithin{figure}{section}
+- \counterwithin{table}{section}
+---
+
+\pagenumbering{gobble}
+
+```{r child = 'titlepage.Rmd'}
+```
+
+\newpage
+
+```{r child = 'declaration.Rmd'}
+```
+
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.path = 'figures/',
+                      echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+
+\newpage
+\pagestyle{fancy}
+\fancyhead[LE,RO]{}
+\fancyhead[LO,RE]{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\pagenumbering{roman}
+
+\fancyhead[CO,CE]{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+\section*{Abstract}
+
+```{r child = 'abstract.Rmd'}
+```
+
+\newpage
+\fancyhead[CO,CE]{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
+\section*{Acknowledgements}
+```{r child = 'acknowledgements.Rmd'}
+```
+
+\newpage
+\fancyhead[CO,CE]{Table of Contents}
+\tableofcontents
+\setcounter{tocdepth}{3}
+
+\newpage
+\fancyhead[CO,CE]{List of Figures}
+\listoffigures
+\addcontentsline{toc}{section}{List of Figures}
+
+\newpage
+\fancyhead[CO,CE]{List of Tables}
+\listoftables
+\addcontentsline{toc}{section}{List of Tables}
+
+\newpage
+\fancyhead[CO,CE]{Introduction}
+\pagenumbering{arabic}
+
+```{r child = 'chapter1.Rmd'}
+```
+
+\FloatBarrier
+\newpage
+\fancyhead[CO,CE]{Business Sentiment}
+
+```{r child = 'chapter2.Rmd'}
+```
+
+\FloatBarrier
+\newpage
+\fancyhead[CO,CE]{Art Prices}
+
+```{r child = 'chapter3.Rmd'}
+```
+
+\FloatBarrier
+\newpage
+\fancyhead[CO,CE]{Historical Commodity Prices}
+
+```{r child = 'chapter4.Rmd'}
+```
+
+\FloatBarrier
+\newpage
+\fancyhead[CO,CE]{Conclusion}
+
+```{r child = 'chapter5.Rmd'}
+```
+
+\FloatBarrier
+\newpage
+\fancyhead[CO,CE]{References}
+
+#References
+

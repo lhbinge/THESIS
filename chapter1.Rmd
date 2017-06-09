@@ -1,0 +1,24 @@
+---
+output: 
+    pdf_document:
+        number_sections: true
+---
+
+#Introduction Chapter
+Increasing amounts of microdata are becoming available [@Boshoff2015]. 
+
+##Business Sentiment
+We look at business sentiment.
+
+##Art Prices
+We look at art prices.
+
+##Historical Commodity Prices
+We look at historical commodity prices
+
+##Contribution
+We print the time series below each chapter
+
+
+
+
