@@ -14,21 +14,12 @@ header-includes:
 - \usepackage{chngcntr}
 - \counterwithin{figure}{section}
 - \counterwithin{table}{section}
+- \usepackage{setspace}\onehalfspacing
 ---
 
 \pagenumbering{gobble}
 
 ```{r child = 'titlepage.Rmd'}
-```
-
-\newpage
-
-```{r child = 'declaration.Rmd'}
-```
-
-```{r include=FALSE}
-knitr::opts_chunk$set(fig.path = 'figures/',
-                      echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 
@@ -41,12 +32,35 @@ knitr::opts_chunk$set(fig.path = 'figures/',
 
 \pagenumbering{roman}
 
+\fancyhead[CO,CE]{Declaration}
+\addcontentsline{toc}{section}{Declaration}
+\section*{Declaration}
+
+```{r child = 'declaration.Rmd'}
+```
+
+```{r include=FALSE}
+knitr::opts_chunk$set(fig.path = 'figures/',
+                      echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+
+\newpage
 \fancyhead[CO,CE]{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 \section*{Abstract}
 
 ```{r child = 'abstract.Rmd'}
 ```
+
+
+\newpage
+\fancyhead[CO,CE]{Opsomming}
+\addcontentsline{toc}{section}{Opsomming}
+\section*{Opsomming}
+```{r child = 'opsomming.Rmd'}
+```
+
 
 \newpage
 \fancyhead[CO,CE]{Acknowledgements}
@@ -56,6 +70,7 @@ knitr::opts_chunk$set(fig.path = 'figures/',
 ```
 
 \newpage
+\addcontentsline{toc}{section}{Table of Contents}
 \fancyhead[CO,CE]{Table of Contents}
 \tableofcontents
 \setcounter{tocdepth}{3}
@@ -77,19 +92,22 @@ knitr::opts_chunk$set(fig.path = 'figures/',
 ```{r child = 'chapter1.Rmd'}
 ```
 
-\FloatBarrier
-\newpage
-\fancyhead[CO,CE]{Business Sentiment}
-
-```{r child = 'chapter2.Rmd'}
-```
 
 \FloatBarrier
 \newpage
 \fancyhead[CO,CE]{Art Prices}
 
+```{r child = 'chapter2.Rmd'}
+```
+
+
+\FloatBarrier
+\newpage
+\fancyhead[CO,CE]{Business Sentiment}
+
 ```{r child = 'chapter3.Rmd'}
 ```
+
 
 \FloatBarrier
 \newpage

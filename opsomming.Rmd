@@ -1,0 +1,8 @@
+---
+output: pdf_document
+fontsize: 12pt
+---
+
+\normalsize
+Groot data is al hoe meer beskikbaar. Ons aggregeer hulle.
+

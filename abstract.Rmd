@@ -4,4 +4,11 @@ fontsize: 12pt
 ---
 
 \normalsize
-Skryf die abstract
+Large microeconomic datasets are becoming increasing available in the modern world. They provide an opportunity to improve the measurement of a range of economic phenomena and to bolster economic research. One way in which these large amounts of microdata sets can aid economic analysis is to construct better macroeconomic indicators.
+
+The primary aim of this dissertation is to use three relatively large microdata sets to create macroeconomic time series indicators. All three datasets have shortcomings which make it challenging to estimate time series indicators. The dissertation uses similar aggregation and estimation techniques, in some cases for the first time in the South African context, to create useful macroeconomic indicators. The secondary aim of the dissertation is to use these indicators, as well as the underlying data, to answer a specific question in each case.
+
+The first case investigates business sentiment in South Africa. This chapter estimates indicators of business confidence and uncertainty for South Africa (1992Q1-2015Q3), using the Bureau for Economic Research's (BER) business tendency surveys. The sentiment indicators are then used to examine the relationship between business sentiment and real activity in South Africa. The second case investigates the South African art market. This chapter estimates South African art price indices (2000Q1-2015Q4), using a relatively large database of art auction prices. The art price indices are then used to look for evidence of a bubble in South African art prices. The third case investigates historical commodity prices in the Cape Colony. This chapter estimates monthly wholesale price indices for the Cape Colony (1889/10-1914/08), using a high-frequency dataset on commodity prices. The high-frequency prices are the used to examine internal market integration in the Cape Colony over this period.
+
+The dissertation tries to contribute to the literature by demonstrating suitable aggregation and estimation techniques to overcome some of the challenges in aggregating relatively large datasets. These aggregation techniques may prove useful in a variety of settings where there are similar challenges. The estimated time series are reported in the appendix of each chapter and each chapter presents some suggested potential future research. The hope is that the indicators will prove useful for further research in each of these fields. 
+
