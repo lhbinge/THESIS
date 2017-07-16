@@ -7,7 +7,7 @@ fontsize: 12pt
 
 \vspace{3 cm}
 
-\Large\scshape\textbf{Creating macroeconomic indicators from microeconomic data: Cycles in business sentiment, art prices and historical commodity prices} \\ 
+\Large\scshape\textbf{Creating macroeconomic indicators from microeconomic data: Cycles in art prices, business sentiment and historical commodity prices} \\ 
 
 \vspace{10 cm}
 
